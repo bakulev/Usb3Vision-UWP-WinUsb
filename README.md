@@ -11,7 +11,7 @@ Then the cam can be accessed via .Net UWP Windows.Devices.Usb namespace
 # USB3Vision
 
 USB3Vision is a protocol for USB cameras that resides on top of USB protocol. 
-According to [USB3Vision spec](https://agora-file-storage-prod.s3-us-west-1.amazonaws.com/workplace/attachment/3707629582321978001?response-content-disposition=attachment%3B%20filename%3D%22USB3_Vision_Specification_v1-0-1.pdf%22%3B%20filename%2A%3Dutf-8%27%27USB3_Vision_Specification_v1-0-1.pdf&X-Amz-Security-Token=FQoGZXIvYXdzEHIaDADW6fRD5Qwx0NxL7SK3AwZjil09G7KwpSBjBmbb6rfM%2BrFOPYyhkGdZO2bOwkj0zQDjZMhL2dZMND37FExDA9YZ877e43wAQI1oyvVoKX0U5M33qVYwlgPkVrzbBWulgjcE8VJKbpfDGxvq11rm0yx750eLeguHOMAF9pOlYrKMVcUNTiZXh9LGCIuQHOXh4e1rGWfKepjFlArhbQTDYZY0altp7r5wOt0CXZVmQq8T9n5aPIOp6bfEK4OOu9JoRM4SFbXTGk8yNj7hdZ5WeFsT3xPACqjr4%2Fp3ASIwMsBHdYSIaqJn5X8sgmYjiVAbL5iy%2FVbp10m%2F33JElUZcbN2njT%2BUopKbCPIViXg1mNrDc%2Bcyvzswa3dXNW96Lpe5NIJ859rC%2Bo1HcnWDxohiNOYj%2BEtoMrbw0jtvaAwdM0tdnKMn5%2FwJ4kDK9ATLFKvbkq8CVH%2F0oEzC8yUVtoU5qrzV%2BYfMiy0lwd1q%2BahvWVgSyDrtEi2dDQuMafofcOAMmlrbkXPMMvjWnJAci0UKDrDet9PQjSk0AXFZGySJL79DmOl4KHyHDOdzksiR2oOBreGAb2TwYDYha768k7EVXljDlRlFEpEo467R2wU%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20180815T173323Z&X-Amz-SignedHeaders=host&X-Amz-Expires=599&X-Amz-Credential=ASIA2YR6PYW5U4TY6FGJ%2F20180815%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Signature=b4179b031487c7cac67ac66523d811150c72511a63a605a27f904dd8a509c453)
+According to [USB3Vision spec](https://github.com/zhoutotong/translateUSB3Vision_V1.0/blob/master/USB3_Vision_v1.0_Jan%2018-2013.pdf)
 , every USB3Vision device supports 3 logical interfaces: 
 - Control (Interface ID = 0) - to control device
 - Event (Interface ID = 1) - to get device specific events
