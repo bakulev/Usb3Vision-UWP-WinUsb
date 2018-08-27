@@ -1,0 +1,2 @@
+﻿This project contains classes that are shared among different camera projects.
+* Calibration parameters - working with bad pixels and averaged images.
