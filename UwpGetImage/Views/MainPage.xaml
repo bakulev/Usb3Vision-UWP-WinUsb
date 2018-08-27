@@ -1,0 +1,65 @@
+﻿<Page
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:UwpGetImage.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:WinRTXamlToolkit.Controls"
+    x:Class="UwpGetImage.Views.MainPage"
+    mc:Ignorable="d"
+    DataContext="{Binding MainPage, Source={StaticResource Locator}}"
+    IsEnabled="{Binding IsAppEnabled}">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState x:Name="Narrow">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="TheImage.Width" Value="323.61" />
+                        <Setter Target="TheImage.Margin" Value="15,410,0,0"/>
+                        <Setter Target="TheImage.Height" Value="200"/>
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Compact">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="720" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="TheImage.Width" Value="809.02" />
+                        <Setter Target="TheImage.Margin" Value="410,90,0,0"/>
+                        <Setter Target="TheImage.Height" Value="500"/>
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Wide">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="1920" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="TheImage.Width" Value="1456.24" />
+                        <Setter Target="TheImage.Margin" Value="410,60,0,0"/>
+                        <Setter Target="TheImage.Height" Value="950"/>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <TextBlock x:Name="ExposureTextBlock" HorizontalAlignment="Left" Margin="10,16,0,0" TextWrapping="Wrap" Text="Exposure Time: " VerticalAlignment="Top"/>
+        <controls:NumericUpDown x:Name="ExposureNumericUpDown" HorizontalAlignment="Left" Margin="130,10,0,0" VerticalAlignment="Top" Height="35" Width="220" SmallChange="1" Maximum="1000" Value="{Binding ExposureTime, Mode=TwoWay}"/>
+        <CheckBox x:Name="LiveCheckBox" Content="Live" HorizontalAlignment="Left" Margin="10,63,0,0" VerticalAlignment="Top" Height="32" Width="69" IsChecked="{Binding IsLiveChecked, Mode=TwoWay}"/>
+        <CheckBox x:Name="LaserCheckBox" Content="Laser Enabled" HorizontalAlignment="Left" Margin="84,63,0,0" VerticalAlignment="Top" IsChecked="{Binding IsLaserChecked, Mode=TwoWay}"/>
+        <CheckBox x:Name="ScaleCheckBox" Content="Scale Values" HorizontalAlignment="Left" Margin="230,63,0,0" VerticalAlignment="Top" IsChecked="{Binding IsScaledChecked, Mode=TwoWay}"/>
+        <TextBox x:Name="MinValueTextBox" IsReadOnly="True" HorizontalAlignment="Left" Margin="90,123,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="30" Width="260" Text="{Binding MinValue}"/>
+        <TextBox x:Name="MaxValueTextBox" IsReadOnly="True" HorizontalAlignment="Left" Margin="90,170,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="30" Width="260" Text="{Binding MaxValue}"/>
+        <TextBlock x:Name="MinValueTextBlock" HorizontalAlignment="Left" Margin="10,123,0,0" TextWrapping="Wrap" Text="Min Value: " VerticalAlignment="Top"/>
+        <TextBlock x:Name="MaxValueTextBlock" HorizontalAlignment="Left" Margin="10,175,0,0" TextWrapping="Wrap" Text="Max Value: " VerticalAlignment="Top"/>
+        <controls:NumericUpDown x:Name="SaveAmountNumericUpDown" HorizontalAlignment="Left" Margin="16,302,0,0" VerticalAlignment="Top" Width="330" Height="34" SmallChange="1" Maximum="1000" Minimum="1" Value="{Binding SaveAmount, Mode=TwoWay}"/>
+        <Button x:Name="SaveButton" Content="Save Image" HorizontalAlignment="Left" Margin="16,339,0,0" VerticalAlignment="Top" Height="34" Width="330" Command="{Binding SaveImageCommand}" IsEnabled="{Binding SaveImageButtonEnabled}"/>
+        <Image x:Name="TheImage" HorizontalAlignment="Left" Height="922" Margin="427,68,0,0" VerticalAlignment="Top" Width="1386" Source="{Binding Image}" Stretch="Fill"/>
+        <Button x:Name="GetImageButton" Content="Capture Image" HorizontalAlignment="Left" Margin="16,219,0,0" VerticalAlignment="Top" Height="55" Width="330" Command="{Binding GetImageCommand}" IsEnabled="{Binding GetImageButtonEnabled}"/>
+        <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="15,276,0,0" TextWrapping="Wrap" Text="{Binding CurrentStatus}" VerticalAlignment="Top"/>
+
+    </Grid>
+</Page>
