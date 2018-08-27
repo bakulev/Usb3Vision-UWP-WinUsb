@@ -1,0 +1,73 @@
+;
+; Installs WinUsb
+;
+
+[Version]
+Signature = "$Windows NT$"
+Class     = USBDevice
+ClassGUID = {88BAE032-5A81-49f0-BC3D-A4FF138216D6}
+Provider=%ProviderName%
+DriverVer=03/25/2018,0.0.0.2
+CatalogFile=basler-winusb.cat
+
+; ========== Manufacturer/Models sections ===========
+
+[Manufacturer]
+%ManufacturerName% = Standard,NTamd64,NTx86
+
+[Standard.NTamd64]
+%DeviceName% =USB_Install, USB\VID_2676&PID_BA02&MI_00
+
+[Standard.NTx86]
+%DeviceName% =USB_Install, USB\VID_2676&PID_BA02&MI_00
+
+
+; ========== Class definition ===========
+
+[ClassInstall32]
+AddReg = ClassInstall_AddReg
+
+[ClassInstall_AddReg]
+HKR,,,,%ClassName%
+HKR,,NoInstallClass,,1
+HKR,,IconPath,%REG_MULTI_SZ%,"%systemroot%\system32\setupapi.dll,-20"
+HKR,,LowerLogoVersion,,5.2
+
+; =================== Installation ===================
+
+[USB_Install]
+Include = winusb.inf
+Needs   = WINUSB.NT
+
+[USB_Install.Services]
+Include =winusb.inf
+Needs   = WINUSB.NT.Services
+
+[USB_Install.HW]
+AddReg=Dev_AddReg
+
+[USB_Install.Wdf]
+KmdfService=WINUSB, WinUsb_Install
+
+[WinUsb_Install]
+KmdfLibraryVersion=1.11
+
+[Dev_AddReg]
+HKR,,DeviceInterfaceGUIDs,0x10000,"{9f543223-cede-4fa3-b376-a25ce9a30e74}"
+
+; [DestinationDirs]
+; If your INF needs to copy files, you must not use the DefaultDestDir directive here.  
+; You must explicitly reference all file-list-section names in this section.
+
+; =================== Strings ===================
+
+[Strings]
+ProviderName="TODO-Set-Provider"
+ManufacturerName="TODO-Set-Manufacturer"
+MediaDescription="Driver Media"
+DeviceName="WinUSB for Basler Cam"
+WinUsb_SvcDesc="WinUSB Driver"
+
+SERVICE_KERNEL_DRIVER = 0x1 
+SERVICE_DEMAND_START  = 0x3 
+SERVICE_ERROR_NORMAL  = 0x1
