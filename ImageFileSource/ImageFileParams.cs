@@ -1,5 +1,5 @@
-﻿using Centice.PASS.Calibration;
-using Centice.PASS.CommonLibrary.Utility;
+﻿//using Centice.PASS.Calibration;
+//using Centice.PASS.CommonLibrary.Utility;
 using Centice.Spectrometry.Base;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Centice.Util;
+//using Centice.Util;
 using System.Windows;
 using System.Threading;
 
@@ -18,7 +18,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
     {
         #region Variables
 
-        ImageFileDevice _device;
+        IImageFileDevice _device;
 
         List<Task> _pendingTasks = new List<Task>();
 
@@ -104,7 +104,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
         #region Public Constructor
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Await.Warning", "CS4014:Await.Warning")]
-        public ImageFileParams (ImageFileDevice device, IUserInterface ui)
+        public ImageFileParams (IImageFileDevice device, IUserInterface ui)
         {
             _device = device;
             _device.Attached += OnDeviceAttached;
@@ -152,7 +152,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
                 try
                 {
                     strCalibration = await UploadCalibration();
-                    _deviceCalibration = XmlSerializationUtil.FromXml<SpectrometerCalibration>(strCalibration);
+                    //_deviceCalibration = XmlSerializationUtil.FromXml<SpectrometerCalibration>(strCalibration);
                     System.Diagnostics.Trace.WriteLine("InspectRxMeasurementSource:LoadCalibration DeviceCalibration");
                     _serialNumber = "serial"; //  _device.SerialNumber;
                 }
@@ -174,7 +174,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
             try
             {
                 _strCalibration = await UploadCalibration();
-                _deviceCalibration = XmlSerializationUtil.FromXml<SpectrometerCalibration>(_strCalibration);
+                //_deviceCalibration = XmlSerializationUtil.FromXml<SpectrometerCalibration>(_strCalibration);
                 System.Diagnostics.Trace.WriteLine("InspectRxMeasurementSource:LoadCalibration DeviceCalibration");
                 _calibrationBinary = new Calibration(DeviceCalibration.ReconstructionCalibrationByteArray);
             }
@@ -240,7 +240,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
                 System.Globalization.CultureInfo.InvariantCulture).Replace(".", "");
             var imageFileName = exposureStr + "-" + temperatureStr + "-" + weightStr;
 
-            var image = FileUtils.LoadDoubleArrToBinary(Path.Combine(binDirectory, imageFileName + ".bin"));
+            double[,] image = null;//FileUtils.LoadDoubleArrToBinary(Path.Combine(binDirectory, imageFileName + ".bin"));
 
             return image; // new ushort[ImageSize.Height, ImageSize.Width];
         }
@@ -336,8 +336,8 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
 
             var measurementPath = _ui.GetMeasurementDirectory();
 
-            if (!string.IsNullOrEmpty(measurementPath))
-                calibration = await Util.FileUtils.ReadAllTextAsync(Path.Combine(measurementPath, "Calibration.xml"));
+            //if (!string.IsNullOrEmpty(measurementPath))
+            //    calibration = await Util.FileUtils.ReadAllTextAsync(Path.Combine(measurementPath, "Calibration.xml"));
 
             return calibration;
         }

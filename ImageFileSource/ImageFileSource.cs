@@ -5,11 +5,12 @@ using System.Threading;
 using System.Text;
 using System.IO;
 
-using Centice.Spectrometry.Base;
+//using Centice.Spectrometry.Base;
 
-using Centice.PASS.CommonLibrary.Utility;
+//using Centice.PASS.CommonLibrary.Utility;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Centice.Spectrometry.Base;
 
 namespace Centice.Spectrometry.Spectrometers.Cameras
 {
@@ -20,7 +21,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
 
         IUserInterface _ui;
 
-        ImageFileDevice _device;
+        IImageFileDevice _device;
 
         List<Task> _pendingTasks = new List<Task>();
 
@@ -79,12 +80,11 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
         #region Public Constructor
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Await.Warning", "CS4014:Await.Warning")]
-        public ImageFileSource(ImageFileDevice device, IUserInterface ui)
+        public ImageFileSource(IImageFileDevice device)
         {
             _device = device;
             _device.Attached += OnDeviceAttached;
             _device.Detached += OnDeviceDetached;
-            _ui = ui;
 
             _name = _device.Name + device.SerialNumber + "Camera";
             _modelNumber = _device.ModelNumber;
@@ -114,15 +114,15 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
         public async Task<CameraImage> AcquireImage(AcquireParams acquireParams,
             CancellationToken ct, IProgress<CameraProgressEventArgs> progress = null)
         {
-            await _device.SetExposure(acquireParams.ExposureTime, ct, progress);
+            await _device.SetExposure(acquireParams.ExposureTime, ct);
 
             if (acquireParams.ExposureType)
-                await _device.LaserTurnOn(ct, progress);
+                await _device.LaserTurnOn(ct);
 
-            var image = await _device.TakeImage(ct, progress);
+            var image = await _device.TakeImage(ct);
 
             if (acquireParams.ExposureType)
-                await _device.LaserTurnOff(ct, progress);
+                await _device.LaserTurnOff(ct);
 
             return new CameraImage(image, _imageWidth, _imageHeight, acquireParams.ExposureType, 1, 35f, acquireParams.ExposureTime, false, false);
         }

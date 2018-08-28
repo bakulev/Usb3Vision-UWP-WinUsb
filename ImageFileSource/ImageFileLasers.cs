@@ -11,7 +11,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
     {
         #region Variables
 
-        ImageFileDevice _device;
+        IImageFileDevice _device;
 
         bool _isEnabled = true;
 
@@ -116,7 +116,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
         #region Public ctor
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Await.Warning", "CS4014:Await.Warning")]
-        public ImageFileLasers(ImageFileDevice device)
+        public ImageFileLasers(IImageFileDevice device)
         {
             _device = device;
             _device.Attached += OnDeviceAttached;
@@ -165,9 +165,9 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
                 var ct = new System.Threading.CancellationToken();
                 if (laserNum == 0)
                     if (isEnabled)
-                        await _device.LaserTurnOn(ct, null);
+                        await _device.LaserTurnOn(ct);
                     else
-                        await _device.LaserTurnOff(ct, null);
+                        await _device.LaserTurnOff(ct);
                 else
                     throw new Exception("Wrong laserNum");
             }

@@ -20,15 +20,18 @@ using MvvmDialogs.FrameworkPickers.FileSave;
 using MvvmDialogs.FrameworkPickers.Folder;
 using UwpGetImage.Classes;
 using UwpGetImage.Models;
-using CodaDevices.Uwp.Devices;
 using System.Diagnostics;
+using Centice.Spectrometry.Base;
+using Centice.Spectrometry.Spectrometers.Cameras;
+using ImageFileSourceDeviceUwp;
 
 namespace UwpGetImage.ViewModels
 {
     public class MainPageViewModel : ViewModelBase
     {
         //Private vars.
-        private readonly ClearShotCamera _camera;
+        private readonly ICamera _camera;
+        private readonly IExcitationLasers _lasers;
         private readonly IDialogService _dialogService;
         private ushort[,] _lastImageArray;
 
@@ -43,10 +46,11 @@ namespace UwpGetImage.ViewModels
             SaveImageCommand = new RelayCommand(SaveImageMethod);
 
             //Setup camera: 
-            _camera = new ClearShotCamera();
-            _camera.StartWaitForCamera();
-            _camera.Connected += OnCameraConnected;
-            _camera.Disconnected += OnCameraDisconnected;
+            var device = new ImageFileDevice(null);
+            _camera = new ImageFileSource(device);
+            _lasers = new ImageFileLasers(device);
+            _camera.Attached += OnCameraConnected;
+            _camera.Detached += OnCameraDisconnected;
 
             //Set page disabled.
             IsAppEnabled = false;
@@ -204,7 +208,7 @@ namespace UwpGetImage.ViewModels
             SaveImageButtonEnabled = true;
 
             //If live checked, Redo.
-            if(IsLiveChecked)
+            if (IsLiveChecked)
                 GetImageMethod();
         }
         async void SaveImageMethod()
@@ -291,74 +295,63 @@ namespace UwpGetImage.ViewModels
                 GetImageButtonEnabled = true;
             }
         }
-        
+
         async Task<WriteableBitmap> GetImageFromCamera()
         {
             CurrentStatus = "Checking for laser.";
-            bool isLaserAvailable = await _camera.IsLaserAvailable();
+            bool isLaserAvailable = await _lasers.GetEnabled(0);
             if (isLaserAvailable && IsLaserChecked)
             {
                 CurrentStatus = "Starting Laser";
-                await _camera.SetLaserEnabled(1, true);
+                await _lasers.SetLaserState(0, true);
             }
-
-            CurrentStatus = "Setting exposure time.";
-            await _camera.SetExposureTime(ExposureTime);
 
             //Start taking image. [shutterState = open, exposureType = light]
             CurrentStatus = "Starting exposure.";
-            if (await _camera.StartExposure(0x01, 0x01))
+            var image = await _camera.AcquireImage(new AcquireParams { ExposureTime = 1, AnalogGain = 1, ExposureType = false },
+                new System.Threading.CancellationToken());
+            if (image != null)
             {
                 var currentTime = DateTime.Now;
-                Await:
+
                 //Await the exposure time.
                 await Funcs.PutTaskDelay(1000); //Just let it wait a second before a 
 
                 //Make sure image is ready.
                 CurrentStatus = $"Checking for exposure, elapsed {DateTime.Now.Subtract(currentTime).Seconds} seconds.";
-                if (await _camera.QueryExposure())
+
+                //Get the image.
+                CurrentStatus = "Exposure available, now getting image.";
+                ushort[,] img = image.Image;
+
+                //Now stop the laser
+                if (isLaserAvailable && IsLaserChecked)
                 {
-                    //Get the image.
-                    CurrentStatus = "Exposure available, now getting image.";
-                    ushort[,] img = await _camera.GetExposure();
-
-                    //Stop the exposure.
-                    CurrentStatus = "Ending Exposure.";
-                    await _camera.EndExposure(0x00); //Close shutter.
-
-                    //Now stop the laser
-                    if (isLaserAvailable && IsLaserChecked)
-                    {
-                        CurrentStatus = "Stoping Laser.";
-                        await _camera.SetLaserEnabled(1, false);
-                    }
-
-                    //Quickly set the textbox data.
-                    CurrentStatus = "Setting Min and Max values.";
-                    var imgHeight = img.GetLength(0);
-                    var imgWidth = img.GetLength(1);
-                    var maxVal = UInt16.MinValue;
-                    var minVal = UInt16.MaxValue;
-                    for (int i = 10; i < imgHeight; i++)
-                    {
-                        for (int j = 10; j < imgWidth; j++)
-                        {
-                            if (maxVal < img[i, j]) maxVal = img[i, j];
-                            if (minVal > img[i, j]) minVal = img[i, j];
-                        }
-                    }
-                    MaxValue = maxVal + "(" + (maxVal * 100 / UInt16.MaxValue).ToString() + "%)";
-                    MinValue = minVal + "(" + (minVal * 100 / UInt16.MaxValue).ToString() + "%)";
-
-                    //Now convert the image and return.
-                    CurrentStatus = "Done";
-                    _lastImageArray = img;
-                    return Imaging.GetImageFromUShort(img, IsScaledChecked, false);
+                    CurrentStatus = "Stoping Laser.";
+                    await _lasers.SetLaserState(0, false);
                 }
-                else
+
+                //Quickly set the textbox data.
+                CurrentStatus = "Setting Min and Max values.";
+                var imgHeight = img.GetLength(0);
+                var imgWidth = img.GetLength(1);
+                var maxVal = UInt16.MinValue;
+                var minVal = UInt16.MaxValue;
+                for (int i = 10; i < imgHeight; i++)
                 {
-                    goto Await;
+                    for (int j = 10; j < imgWidth; j++)
+                    {
+                        if (maxVal < img[i, j]) maxVal = img[i, j];
+                        if (minVal > img[i, j]) minVal = img[i, j];
+                    }
                 }
+                MaxValue = maxVal + "(" + (maxVal * 100 / UInt16.MaxValue).ToString() + "%)";
+                MinValue = minVal + "(" + (minVal * 100 / UInt16.MaxValue).ToString() + "%)";
+
+                //Now convert the image and return.
+                CurrentStatus = "Done";
+                _lastImageArray = img;
+                return Imaging.GetImageFromUShort(img, IsScaledChecked, false);
             }
             return null;
         }
@@ -372,8 +365,8 @@ namespace UwpGetImage.ViewModels
                 "The camera has been connected.", DateTimeOffset.Now.AddMinutes(1));
             notification.Show();
 
-            string strSerialNumber = await _camera.GetSerialNumber();
-            string strCalibration = await _camera.GetCalibration();
+            string strSerialNumber =  _camera.SerialNumber;
+            string strCalibration =  "";
             string fileName = DateTime.Now.ToString("yyyyMMdd-HHmmss");
             fileName += "-Calibration" + strSerialNumber + ".xml";
             try
@@ -394,9 +387,6 @@ namespace UwpGetImage.ViewModels
             {
                 DeviceCalibration = XmlSerializationUtil.FromXml<SpectrometerCalibration>(strCalibration);
             }*/
-
-            //Set default.
-            ExposureTime = await _camera.GetExposureTime();
         }
 
         void OnCameraDisconnected(object sender, EventArgs e)
@@ -406,7 +396,7 @@ namespace UwpGetImage.ViewModels
                 "The camera has been disconnected.", DateTimeOffset.Now.AddMinutes(1));
             notification.Show();
         }
-#endregion
+        #endregion
 
     }
 }

@@ -5,10 +5,9 @@ using System.Threading;
 using System.Text;
 using System.IO;
 
-using Centice.Spectrometry.Base;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using CodaDevices.Spectrometry.CodaMath;
+
 
 namespace Centice.Spectrometry.Spectrometers.Cameras
 {

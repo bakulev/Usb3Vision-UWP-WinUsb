@@ -3,9 +3,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using LibUsbDotNet;
-using LibUsbDotNet.DeviceNotify;
-using LibUsbDotNet.Main;
+//using LibUsbDotNet;
+//using LibUsbDotNet.DeviceNotify;
+//using LibUsbDotNet.Main;
 
 namespace Centice.Spectrometry.Spectrometers.Cameras
 {

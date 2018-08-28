@@ -299,7 +299,7 @@ namespace Centice.Spectrometry.Base
         /// <param name="backgroundSubtracted">Indicates if a dark CCD image was subtracted from the CCD image.</param>
         /// <param name="saturated">Indicate if the CCD image was saturated.</param>
         public CameraImage(
-            ushort[] image,
+            ushort[,] image,
             int imageWidth,
             int imageHeight,
             bool exposureType,
@@ -309,7 +309,7 @@ namespace Centice.Spectrometry.Base
             bool backgroundSubtracted,
             bool saturated)
         {
-            PackedImage = image;
+            Image = image;
             m_ImageWidth = imageWidth;
             m_ImageHeight = imageHeight;
 
@@ -370,16 +370,7 @@ namespace Centice.Spectrometry.Base
         /// </summary>		
         public ushort[,] Image
         {
-            get
-            {
-                return UnpackImage(PackedImage, ImageWidth, ImageHeight);
-            }
-            //set
-            //{
-            //    PackedImage = PackImage(value);
-            //    m_ImageSize.Width = value.GetLength(1);
-            //    m_ImageSize.Height = value.GetLength(0);
-            //}
+            get;set;
         }
 
 
