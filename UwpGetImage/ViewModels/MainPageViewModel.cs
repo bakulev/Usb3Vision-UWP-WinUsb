@@ -22,13 +22,14 @@ using UwpGetImage.Classes;
 using UwpGetImage.Models;
 using CodaDevices.Uwp.Devices;
 using System.Diagnostics;
+using UwpBaslerCamera;
 
 namespace UwpGetImage.ViewModels
 {
     public class MainPageViewModel : ViewModelBase
     {
         //Private vars.
-        private readonly ClearShotCamera _camera;
+        private readonly BaslerCamera _camera;
         private readonly IDialogService _dialogService;
         private ushort[,] _lastImageArray;
 
@@ -43,7 +44,7 @@ namespace UwpGetImage.ViewModels
             SaveImageCommand = new RelayCommand(SaveImageMethod);
 
             //Setup camera: 
-            _camera = new ClearShotCamera();
+            _camera = new BaslerCamera();
             _camera.StartWaitForCamera();
             _camera.Connected += OnCameraConnected;
             _camera.Disconnected += OnCameraDisconnected;
@@ -294,73 +295,12 @@ namespace UwpGetImage.ViewModels
         
         async Task<WriteableBitmap> GetImageFromCamera()
         {
-            CurrentStatus = "Checking for laser.";
-            bool isLaserAvailable = await _camera.IsLaserAvailable();
-            if (isLaserAvailable && IsLaserChecked)
-            {
-                CurrentStatus = "Starting Laser";
-                await _camera.SetLaserEnabled(1, true);
-            }
 
-            CurrentStatus = "Setting exposure time.";
-            await _camera.SetExposureTime(ExposureTime);
-
-            //Start taking image. [shutterState = open, exposureType = light]
-            CurrentStatus = "Starting exposure.";
-            if (await _camera.StartExposure(0x01, 0x01))
-            {
-                var currentTime = DateTime.Now;
-                Await:
-                //Await the exposure time.
-                await Funcs.PutTaskDelay(1000); //Just let it wait a second before a 
-
-                //Make sure image is ready.
-                CurrentStatus = $"Checking for exposure, elapsed {DateTime.Now.Subtract(currentTime).Seconds} seconds.";
-                if (await _camera.QueryExposure())
-                {
-                    //Get the image.
-                    CurrentStatus = "Exposure available, now getting image.";
                     ushort[,] img = await _camera.GetExposure();
 
-                    //Stop the exposure.
-                    CurrentStatus = "Ending Exposure.";
-                    await _camera.EndExposure(0x00); //Close shutter.
 
-                    //Now stop the laser
-                    if (isLaserAvailable && IsLaserChecked)
-                    {
-                        CurrentStatus = "Stoping Laser.";
-                        await _camera.SetLaserEnabled(1, false);
-                    }
-
-                    //Quickly set the textbox data.
-                    CurrentStatus = "Setting Min and Max values.";
-                    var imgHeight = img.GetLength(0);
-                    var imgWidth = img.GetLength(1);
-                    var maxVal = UInt16.MinValue;
-                    var minVal = UInt16.MaxValue;
-                    for (int i = 10; i < imgHeight; i++)
-                    {
-                        for (int j = 10; j < imgWidth; j++)
-                        {
-                            if (maxVal < img[i, j]) maxVal = img[i, j];
-                            if (minVal > img[i, j]) minVal = img[i, j];
-                        }
-                    }
-                    MaxValue = maxVal + "(" + (maxVal * 100 / UInt16.MaxValue).ToString() + "%)";
-                    MinValue = minVal + "(" + (minVal * 100 / UInt16.MaxValue).ToString() + "%)";
-
-                    //Now convert the image and return.
-                    CurrentStatus = "Done";
-                    _lastImageArray = img;
                     return Imaging.GetImageFromUShort(img, IsScaledChecked, false);
-                }
-                else
-                {
-                    goto Await;
-                }
-            }
-            return null;
+
         }
         #endregion
 
