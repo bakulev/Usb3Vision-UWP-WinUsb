@@ -209,7 +209,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
         /// Captures an image from the camera.
         /// </summary>
         /// <param name="image">A reference to the CameraImage or DarkCameraImage that is to store the newly taken camera image.</param>
-        public async Task<CameraImage> AcquireImage(AcquireParams acquireParams,
+        public async Task<CameraImage> AcquireImageAsync(AcquireParams acquireParams,
             CancellationToken ct, IProgress<CameraProgressEventArgs> progress = null)
         {
             await Task.Delay(0); // temporary for eliminating warning message.

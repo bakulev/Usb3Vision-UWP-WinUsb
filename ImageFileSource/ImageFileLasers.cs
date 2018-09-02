@@ -11,7 +11,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
     {
         #region Variables
 
-        IImageFileDevice _device;
+        IImageDevice _device;
 
         bool _isEnabled = true;
 
@@ -116,7 +116,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
         #region Public ctor
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Await.Warning", "CS4014:Await.Warning")]
-        public ImageFileLasers(IImageFileDevice device)
+        public ImageFileLasers(IImageDevice device)
         {
             _device = device;
             _device.Attached += OnDeviceAttached;

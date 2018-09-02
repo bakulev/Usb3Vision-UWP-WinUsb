@@ -139,6 +139,14 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BaslerDeviceUwp\BaslerDeviceUwp.csproj">
+      <Project>{E001F83A-AE4F-4DDA-BD06-302DAF7DAE17}</Project>
+      <Name>BaslerDeviceUwp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BaslerWinUsb\BaslerWinUsb.csproj">
+      <Project>{3FC5CB9C-AD14-44F5-9A9C-B96CF9E507D7}</Project>
+      <Name>BaslerWinUsb</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CamerasCommon\CamerasCommon.csproj">
       <Project>{DC4EE928-51CC-4EB9-B6B4-5FF3E200EF6E}</Project>
       <Name>CamerasCommon</Name>

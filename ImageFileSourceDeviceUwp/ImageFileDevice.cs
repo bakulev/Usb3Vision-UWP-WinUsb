@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ImageFileSourceDeviceUwp
 {
-    public class ImageFileDevice : IImageFileDevice
+    public class ImageFileDevice : IImageDevice
     {
         #region Variables
 
@@ -250,7 +250,7 @@ namespace ImageFileSourceDeviceUwp
         }
 
         public async Task<ushort[,]> TakeImage(
-            CancellationToken ct)
+            AcquireParams acquireParams, CancellationToken ct, IProgress<CameraProgressEventArgs> progress = null)
         {
             await Task.Delay(0); // temporary for eliminating warning message.
 

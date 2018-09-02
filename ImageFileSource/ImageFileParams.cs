@@ -18,7 +18,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
     {
         #region Variables
 
-        IImageFileDevice _device;
+        IImageDevice _device;
 
         List<Task> _pendingTasks = new List<Task>();
 
@@ -104,7 +104,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
         #region Public Constructor
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Await.Warning", "CS4014:Await.Warning")]
-        public ImageFileParams (IImageFileDevice device, IUserInterface ui)
+        public ImageFileParams (IImageDevice device, IUserInterface ui)
         {
             _device = device;
             _device.Attached += OnDeviceAttached;

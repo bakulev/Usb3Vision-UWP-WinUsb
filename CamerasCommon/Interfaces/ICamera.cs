@@ -69,7 +69,7 @@ namespace Centice.Spectrometry.Base
         /// Synchronously acquires an image of the required type.
         /// </summary>
         /// <param name="exposureType">The type of image to acquire (light, dark, or reference).</param>
-        Task<CameraImage> AcquireImage(AcquireParams acquireParams, 
+        Task<CameraImage> AcquireImageAsync(AcquireParams acquireParams, 
             CancellationToken ct, IProgress<CameraProgressEventArgs> progress = null);
 
         //////////////////////////////////////////////////////////////////////////	

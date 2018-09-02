@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Centice.Spectrometry.Base
 {
-    public interface IImageFileDevice
+    public interface IImageDevice
     {
 
         #region Fields
@@ -61,7 +61,7 @@ namespace Centice.Spectrometry.Base
         Task<bool> SetExposure(float exposureTime,
             CancellationToken ct);
 
-        Task<ushort[,]> TakeImage(
-            CancellationToken ct);
+        Task<ushort[,]> TakeImage(AcquireParams acquireParams, 
+            CancellationToken ct, IProgress<CameraProgressEventArgs> progress = null);
     }
 }

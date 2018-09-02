@@ -21,7 +21,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
 
         IUserInterface _ui;
 
-        IImageFileDevice _device;
+        IImageDevice _device;
 
         List<Task> _pendingTasks = new List<Task>();
 
@@ -80,7 +80,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
         #region Public Constructor
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Await.Warning", "CS4014:Await.Warning")]
-        public ImageFileSource(IImageFileDevice device)
+        public ImageFileSource(IImageDevice device)
         {
             _device = device;
             _device.Attached += OnDeviceAttached;
@@ -111,7 +111,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
         /// Captures an image from the camera.
         /// </summary>
         /// <param name="image">A reference to the CameraImage or DarkCameraImage that is to store the newly taken camera image.</param>
-        public async Task<CameraImage> AcquireImage(AcquireParams acquireParams,
+        public async Task<CameraImage> AcquireImageAsync(AcquireParams acquireParams,
             CancellationToken ct, IProgress<CameraProgressEventArgs> progress = null)
         {
             await _device.SetExposure(acquireParams.ExposureTime, ct);
@@ -119,7 +119,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
             if (acquireParams.ExposureType)
                 await _device.LaserTurnOn(ct);
 
-            var image = await _device.TakeImage(ct);
+            var image = await _device.TakeImage(acquireParams, ct);
 
             if (acquireParams.ExposureType)
                 await _device.LaserTurnOff(ct);

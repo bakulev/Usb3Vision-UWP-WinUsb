@@ -24,6 +24,8 @@ using System.Diagnostics;
 using Centice.Spectrometry.Base;
 using Centice.Spectrometry.Spectrometers.Cameras;
 using ImageFileSourceDeviceUwp;
+using BaslerDeviceUwp;
+using BaslerWinUsb;
 
 namespace UwpGetImage.ViewModels
 {
@@ -46,9 +48,9 @@ namespace UwpGetImage.ViewModels
             SaveImageCommand = new RelayCommand(SaveImageMethod);
 
             //Setup camera: 
-            var device = new ImageFileDevice(null);
-            _camera = new ImageFileSource(device);
-            _lasers = new ImageFileLasers(device);
+            var device = new BaslerDevice();
+            _camera = new BaslerCamera(device);
+            _lasers = new BaslerLaser(device);
             _camera.Attached += OnCameraConnected;
             _camera.Detached += OnCameraDisconnected;
 
@@ -299,7 +301,9 @@ namespace UwpGetImage.ViewModels
         async Task<WriteableBitmap> GetImageFromCamera()
         {
             CurrentStatus = "Checking for laser.";
-            bool isLaserAvailable = await _lasers.GetEnabled(0);
+
+            //TODO: temporary code
+            bool isLaserAvailable = false;//await _lasers.GetEnabled(0);
             if (isLaserAvailable && IsLaserChecked)
             {
                 CurrentStatus = "Starting Laser";
@@ -308,7 +312,7 @@ namespace UwpGetImage.ViewModels
 
             //Start taking image. [shutterState = open, exposureType = light]
             CurrentStatus = "Starting exposure.";
-            var image = await _camera.AcquireImage(new AcquireParams { ExposureTime = 1, AnalogGain = 1, ExposureType = false },
+            var image = await _camera.AcquireImageAsync(new AcquireParams { ExposureTime = 1, AnalogGain = 1, ExposureType = false },
                 new System.Threading.CancellationToken());
             if (image != null)
             {
@@ -328,25 +332,9 @@ namespace UwpGetImage.ViewModels
                 if (isLaserAvailable && IsLaserChecked)
                 {
                     CurrentStatus = "Stoping Laser.";
-                    await _lasers.SetLaserState(0, false);
+                    //TODO: temporary commented
+                    //await _lasers.SetLaserState(0, false);
                 }
-
-                //Quickly set the textbox data.
-                CurrentStatus = "Setting Min and Max values.";
-                var imgHeight = img.GetLength(0);
-                var imgWidth = img.GetLength(1);
-                var maxVal = UInt16.MinValue;
-                var minVal = UInt16.MaxValue;
-                for (int i = 10; i < imgHeight; i++)
-                {
-                    for (int j = 10; j < imgWidth; j++)
-                    {
-                        if (maxVal < img[i, j]) maxVal = img[i, j];
-                        if (minVal > img[i, j]) minVal = img[i, j];
-                    }
-                }
-                MaxValue = maxVal + "(" + (maxVal * 100 / UInt16.MaxValue).ToString() + "%)";
-                MinValue = minVal + "(" + (minVal * 100 / UInt16.MaxValue).ToString() + "%)";
 
                 //Now convert the image and return.
                 CurrentStatus = "Done";
