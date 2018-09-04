@@ -30,6 +30,7 @@ namespace BaslerDeviceUwp.Helpers
         #endregion
         
         #region Properties
+
         public UsbBulkInPipe StreamInPipe { get; set; }
         public UsbBulkInPipe ControlInPipe { get; set; }
         public UsbBulkOutPipe ControlOutPipe { get; set; }
@@ -63,6 +64,8 @@ namespace BaslerDeviceUwp.Helpers
             }
         }
 
+        public uint MaxBufferSize => StreamInPipe.MaxTransferSizeBytes;
+
         public async Task<Int64> GetRegisterValueAsync(long address)
         {
             byte[] result = await SendReadCommandWithResult(address, 8);
@@ -84,13 +87,12 @@ namespace BaslerDeviceUwp.Helpers
 
         public async Task<byte[]> GetImageData()
         {
-            //Config
-            if((StreamInPipe.ReadOptions & UsbReadOptions.AllowPartialReads) != 0)
+            if ((StreamInPipe.ReadOptions & UsbReadOptions.AllowPartialReads) != 0)
                 StreamInPipe.ReadOptions ^= UsbReadOptions.AllowPartialReads;
             StreamInPipe.ReadOptions |= UsbReadOptions.OverrideAutomaticBufferManagement;
 
-           //Setup stream.
-           var stream = StreamInPipe.InputStream;
+            //Setup stream.
+            var stream = StreamInPipe.InputStream;
             using (DataReader reader = new DataReader(stream))
             {
 

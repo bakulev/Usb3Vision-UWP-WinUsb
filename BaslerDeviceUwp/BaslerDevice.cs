@@ -45,9 +45,9 @@ namespace BaslerDeviceUwp
 
         public string SerialNumber => throw new NotImplementedException();
 
-        public int ImageHeight => GetImageHeigth();
+        public int ImageHeight { get; private set; }
 
-        public int ImageWidth => GetImageWidth();
+        public int ImageWidth { get; private set; }
 
         public bool IsAttached { get; private set; }
 
@@ -62,16 +62,6 @@ namespace BaslerDeviceUwp
         #endregion
 
         #region Methods
-
-        private int GetImageHeigth()
-        {
-            return 1200;
-        }
-
-        private int GetImageWidth()
-        {
-            return 1920;
-        }
 
         private async void OnDeviceAdded(DeviceWatcher watcher, DeviceInformation deviceInformation)
         {
@@ -135,6 +125,10 @@ namespace BaslerDeviceUwp
         public async Task<ushort[,]> TakeImage(
             AcquireParams acquireParams, CancellationToken ct, IProgress<CameraProgressEventArgs> progress = null)
         {
+
+            //Pixel format
+            var rez = await _cameraHelper.SetConfigRegisterAsync(196644, 5);
+
             //Get SBRM register
             var sbrm = await _cameraHelper.GetRegisterValueAsync(0x001D8);
 
@@ -147,15 +141,16 @@ namespace BaslerDeviceUwp
             //Get trailer size
             var trailerSize = await _cameraHelper.GetBlocksSizeAsync(sirm + 0x14);
 
-            var width = 1920;//GetImageWidth(); 
-            var height = 1200;// GetImageHeigth();
+            var width = await _cameraHelper.GetBlocksSizeAsync(197124);
+            var height = await _cameraHelper.GetBlocksSizeAsync(197156);
+
             ///
-            var rez = await _cameraHelper.SetConfigRegisterAsync(0x40104, 0);
+            rez = await _cameraHelper.SetConfigRegisterAsync(0x40104, 0);
             rez = await _cameraHelper.SetConfigRegisterAsync(0x40204, 0);
             rez = await _cameraHelper.SetConfigRegisterAsync(0x40004, 0);
             rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0004, 0);
-            rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x001C, width * height / 2 );
-            rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0020, 2); 
+            rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x001C, width * height);
+            rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0020, 4); 
             rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0024, 206848);
             rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0028, 0);
             rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0018, leaderSize);
@@ -170,20 +165,19 @@ namespace BaslerDeviceUwp
             //Exposure time
             rez = await _cameraHelper.SetConfigRegisterAsync(263268, (int)acquireParams.ExposureTime);
 
-            //Pixel format
-            //rez = await _cameraHelper.SetConfigRegisterAsync(196644, 0x01080001);
-
             rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0004, 1);
             rez = await _cameraHelper.SetConfigRegisterAsync(0x40024, 0x01);
 
             byte[] data = new byte[0];
             var leader = await _cameraHelper.GetImageData();
-            for (int i = 0; i < 2; i++)
+
+            while (data.Length < width * height * 2)
                 data = ArrayHelper.ConcatArrays(data, await _cameraHelper.GetImageData());
             var trailer = await _cameraHelper.GetImageData();
 
             rez = await _cameraHelper.SetConfigRegisterAsync(0x40044, 0x01);
 
+            ImageHeight = height; ImageWidth = width;
             return ArrayHelper.UnpackImage(data, width, height);
         }
         #endregion

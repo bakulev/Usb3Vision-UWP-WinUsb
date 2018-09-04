@@ -25,10 +25,12 @@ namespace BaslerDeviceUwp.Helpers
         public static ushort[,] UnpackImage(byte[] data, int iWidth, int iHeight)
         {
             var result = new ushort[iHeight, iWidth];
+            var offset = 0;
             for (var i = 0; i < iHeight; ++i)
                 for (var j = 0; j < iWidth; ++j)
                 {
-                    result[i, j] = (ushort)(data[j + i * iHeight] << 7);
+                    result[i, j] = BitConverter.ToUInt16(new byte[2] { data[offset + 1], data[offset] }, 0);
+                    offset += 2;
                 }
             return result;
         }
