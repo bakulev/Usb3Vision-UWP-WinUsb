@@ -7,7 +7,7 @@ using System.IO;
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
-
+using Centice.Spectrometry.Base;
 
 namespace Centice.Spectrometry.Spectrometers.Cameras
 {

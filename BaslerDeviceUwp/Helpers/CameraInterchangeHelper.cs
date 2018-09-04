@@ -39,7 +39,7 @@ namespace BaslerDeviceUwp.Helpers
         public async Task<uint> SendCommand(byte[] cmd)
         {
             //Setup the pipe.
-            ControlOutPipe.WriteOptions |= UsbWriteOptions.ShortPacketTerminate;
+            //ControlOutPipe.WriteOptions |= UsbWriteOptions.ShortPacketTerminate;
 
             //Setup the stream.
             var stream = ControlOutPipe.OutputStream;
@@ -85,17 +85,19 @@ namespace BaslerDeviceUwp.Helpers
         public async Task<byte[]> GetImageData()
         {
             //Config
-            StreamInPipe.ReadOptions |= UsbReadOptions.IgnoreShortPacket | UsbReadOptions.AllowPartialReads;
+            if((StreamInPipe.ReadOptions & UsbReadOptions.AllowPartialReads) != 0)
+                StreamInPipe.ReadOptions ^= UsbReadOptions.AllowPartialReads;
+            StreamInPipe.ReadOptions |= UsbReadOptions.OverrideAutomaticBufferManagement;
 
-            //Setup stream.
-            var stream = StreamInPipe.InputStream;
+           //Setup stream.
+           var stream = StreamInPipe.InputStream;
             using (DataReader reader = new DataReader(stream))
             {
 
                 uint bytesRead = 0;
                 try
                 {
-                    bytesRead = await reader.LoadAsync(StreamInPipe.EndpointDescriptor.MaxPacketSize);
+                    bytesRead = await reader.LoadAsync(StreamInPipe.MaxTransferSizeBytes);
                 }
                 catch (Exception exception)
                 {
@@ -167,6 +169,7 @@ namespace BaslerDeviceUwp.Helpers
 
             _header.request_id = ++_commandId;
             _header.cmd = WRITEMEM_CMD;
+            _header.length = 12;
 
             //create the cmd.
             byte[] cmd = ArrayHelper.ConcatArrays(ArrayHelper.getBytes(_header), 

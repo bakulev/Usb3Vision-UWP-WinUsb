@@ -94,9 +94,9 @@ namespace UwpGetImage.Classes
             float maxVal = 1;
             if (scale)
             {
-                for (int i = 10; i < imgHeight; i++)
+                for (int i = 0; i < imgHeight; i++)
                 {
-                    for (int j = 10; j < imgWidth; j++)
+                    for (int j = 0; j < imgWidth; j++)
                     {
                         if (maxVal < img[i, j])
                         {
@@ -110,9 +110,9 @@ namespace UwpGetImage.Classes
             
             using (bitmap.GetBitmapContext())
             {
-                for (int i = 10; i < imgHeight; i++)
+                for (int i = 0; i < imgHeight; i++)
                 {
-                    for (int j = 10; j < imgWidth; j++)
+                    for (int j = 0; j < imgWidth; j++)
                     {
                         if (scale)
                         {

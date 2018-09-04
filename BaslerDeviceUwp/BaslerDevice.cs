@@ -45,9 +45,9 @@ namespace BaslerDeviceUwp
 
         public string SerialNumber => throw new NotImplementedException();
 
-        public int ImageHeight => throw new NotImplementedException();
+        public int ImageHeight => GetImageHeigth();
 
-        public int ImageWidth => throw new NotImplementedException();
+        public int ImageWidth => GetImageWidth();
 
         public bool IsAttached { get; private set; }
 
@@ -62,6 +62,17 @@ namespace BaslerDeviceUwp
         #endregion
 
         #region Methods
+
+        private int GetImageHeigth()
+        {
+            return 1200;
+        }
+
+        private int GetImageWidth()
+        {
+            return 1920;
+        }
+
         private async void OnDeviceAdded(DeviceWatcher watcher, DeviceInformation deviceInformation)
         {
             if (deviceInformation.IsEnabled)
@@ -74,10 +85,14 @@ namespace BaslerDeviceUwp
                         _cameraHelper.ControlInPipe = interf.BulkInPipes[0];
                         _cameraHelper.ControlOutPipe = interf.BulkOutPipes[0];
                     }
-                    else if (interf.InterfaceNumber == 2)
+                    else if (interf.InterfaceNumber == 1)
                     {
                         _cameraHelper.StreamInPipe = interf.BulkInPipes[0];
                     }
+                    //else if (interf.InterfaceNumber == 2)
+                    //{
+                    //    _cameraHelper.StreamInPipe = interf.BulkInPipes[0];
+                    //}
                 }
 
                 IsAttached = true;
@@ -124,7 +139,7 @@ namespace BaslerDeviceUwp
             var sbrm = await _cameraHelper.GetRegisterValueAsync(0x001D8);
 
             //Read SIRM register
-            var sirm = await _cameraHelper.GetRegisterValueAsync(sbrm + 0x00020);
+            var sirm = await _cameraHelper.GetRegisterValueAsync(sbrm + 0x0020);
 
             //Get leader size.
             var leaderSize = await _cameraHelper.GetBlocksSizeAsync(sirm + 0x10);
@@ -132,57 +147,44 @@ namespace BaslerDeviceUwp
             //Get trailer size
             var trailerSize = await _cameraHelper.GetBlocksSizeAsync(sirm + 0x14);
 
-            var pSize = await _cameraHelper.GetBlocksSizeAsync(sirm + 0x08);
+            var width = 1920;//GetImageWidth(); 
+            var height = 1200;// GetImageHeigth();
+            ///
+            var rez = await _cameraHelper.SetConfigRegisterAsync(0x40104, 0);
+            rez = await _cameraHelper.SetConfigRegisterAsync(0x40204, 0);
+            rez = await _cameraHelper.SetConfigRegisterAsync(0x40004, 0);
+            rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0004, 0);
+            rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x001C, width * height / 2 );
+            rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0020, 2); 
+            rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0024, 206848);
+            rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0028, 0);
+            rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0018, leaderSize);
+            rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x002c, trailerSize);
+            rez = await _cameraHelper.SetConfigRegisterAsync(0x40024, 0x01);
 
-            //Setup Stream Configuration
-            //Set max transfer size for the cam
-            if (await _cameraHelper.SetConfigRegisterAsync(sirm + 0x1C, 1024) != 0)
-                return null;
-
-            var p1Size = await _cameraHelper.GetBlocksSizeAsync(sirm + 0x1C);
-
-
-            //Set number of transfers of data per frame.
-            if (await _cameraHelper.SetConfigRegisterAsync(sirm + 0x20, pSize / 1024) != 0)
-                return null;
-
-            var ntrans = await _cameraHelper.GetBlocksSizeAsync(sirm + 0x20);
-
-
-            //Set max leader and trailing buffer
-            //Set number of transfers of data per frame.
-            if (await _cameraHelper.SetConfigRegisterAsync(sirm + 0x18, 65536) != 0)
-                return null;
-
-            var rez = await _cameraHelper.SetConfigRegisterAsync(0x40004, 0);
-
-
-            Debug.WriteLine($"Acuisition status before: {await _cameraHelper.GetRegisterValueAsync(0x40608)}");
-
-            rez = await _cameraHelper.SetConfigRegisterAsync(262468, 1);
-            rez = await _cameraHelper.SetConfigRegisterAsync(262404, 1);
-            rez = await _cameraHelper.SetConfigRegisterAsync(1278500, 36);
+            //exposure mode
+            //EnumEntry_ExposureMode_Timed = 1
+            //EnumEntry_ExposureMode_TriggerWidth = 2
             rez = await _cameraHelper.SetConfigRegisterAsync(263172, 1);
-            rez = await _cameraHelper.SetConfigRegisterAsync(263268, 1000);
 
-            //acuisition start
-            rez = await _cameraHelper.SetConfigRegisterAsync(0x40024, 1);
+            //Exposure time
+            rez = await _cameraHelper.SetConfigRegisterAsync(263268, (int)acquireParams.ExposureTime);
 
-            //trigger event ???
-            rez = await _cameraHelper.SetConfigRegisterAsync(262436, 1);
+            //Pixel format
+            //rez = await _cameraHelper.SetConfigRegisterAsync(196644, 0x01080001);
 
-            Debug.WriteLine($"Acuisition status after: {await _cameraHelper.GetRegisterValueAsync(0x40608)}");
+            rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0004, 1);
+            rez = await _cameraHelper.SetConfigRegisterAsync(0x40024, 0x01);
 
-            //var data = await GetImageData();
+            byte[] data = new byte[0];
+            var leader = await _cameraHelper.GetImageData();
+            for (int i = 0; i < 2; i++)
+                data = ArrayHelper.ConcatArrays(data, await _cameraHelper.GetImageData());
+            var trailer = await _cameraHelper.GetImageData();
 
-            Thread.Sleep(1000);
+            rez = await _cameraHelper.SetConfigRegisterAsync(0x40044, 0x01);
 
-            //acuisition stop
-            rez = await _cameraHelper.SetConfigRegisterAsync(0x40044, 1);
-
-
-            Thread.Sleep(20000);
-            return null;
+            return ArrayHelper.UnpackImage(data, width, height);
         }
         #endregion
     }

@@ -22,6 +22,17 @@ namespace BaslerDeviceUwp.Helpers
             return myBuffer;
         }
 
+        public static ushort[,] UnpackImage(byte[] data, int iWidth, int iHeight)
+        {
+            var result = new ushort[iHeight, iWidth];
+            for (var i = 0; i < iHeight; ++i)
+                for (var j = 0; j < iWidth; ++j)
+                {
+                    result[i, j] = (ushort)(data[j + i * iHeight] << 7);
+                }
+            return result;
+        }
+
         public static T[] SubArray<T>(T[] data, int index, int length)
         {
             T[] result = new T[length];

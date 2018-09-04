@@ -56,12 +56,12 @@ namespace BaslerWinUsb
 
         private void _device_Detached(object sender, EventArgs e)
         {
-            Attached?.Invoke(sender, e);
+            Detached?.Invoke(sender, e);
         }
 
         private void _device_Attached(object sender, EventArgs e)
         {
-            Detached?.Invoke(sender, e);
+            Attached?.Invoke(sender, e);    
         }
         #endregion
     }

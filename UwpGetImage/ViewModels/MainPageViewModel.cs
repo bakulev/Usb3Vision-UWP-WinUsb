@@ -301,6 +301,8 @@ namespace UwpGetImage.ViewModels
         async Task<WriteableBitmap> GetImageFromCamera()
         {
             CurrentStatus = "Checking for laser.";
+            //int imageWidth = _camera.ImageWidth;
+            //int imageHeight = _camera.ImageHeight;
 
             //TODO: temporary code
             bool isLaserAvailable = false;//await _lasers.GetEnabled(0);
@@ -312,7 +314,7 @@ namespace UwpGetImage.ViewModels
 
             //Start taking image. [shutterState = open, exposureType = light]
             CurrentStatus = "Starting exposure.";
-            var image = await _camera.AcquireImageAsync(new AcquireParams { ExposureTime = 1, AnalogGain = 1, ExposureType = false },
+            var image = await _camera.AcquireImageAsync(new AcquireParams { ExposureTime = ExposureTime * 1000, AnalogGain = 1, ExposureType = false },
                 new System.Threading.CancellationToken());
             if (image != null)
             {
@@ -353,23 +355,29 @@ namespace UwpGetImage.ViewModels
                 "The camera has been connected.", DateTimeOffset.Now.AddMinutes(1));
             notification.Show();
 
-            string strSerialNumber =  _camera.SerialNumber;
-            string strCalibration =  "";
-            string fileName = DateTime.Now.ToString("yyyyMMdd-HHmmss");
-            fileName += "-Calibration" + strSerialNumber + ".xml";
-            try
-            {
-                StorageFile file = await KnownFolders.SavedPictures.CreateFileAsync(fileName);
-                await FileIO.WriteTextAsync(file, strCalibration);
-            }
-            catch (UnauthorizedAccessException e1)
-            {
-                Debug.WriteLine("Failed to create file \"" + fileName + "\": " + e1.Message);
-            }
-            catch (Exception e2)
-            {
-                Debug.WriteLine("Exception: " + e2.Message);
-            }
+            //************************************************************************************
+            ////TODO: commented temporarelly
+            //string strSerialNumber =  _camera.SerialNumber;
+            //string strCalibration =  "";
+            //string fileName = DateTime.Now.ToString("yyyyMMdd-HHmmss");
+            //fileName += "-Calibration" + strSerialNumber + ".xml";
+            //try
+            //{
+            //    StorageFile file = await KnownFolders.SavedPictures.CreateFileAsync(fileName);
+            //    await FileIO.WriteTextAsync(file, strCalibration);
+            //}
+            //catch (UnauthorizedAccessException e1)
+            //{
+            //    Debug.WriteLine("Failed to create file \"" + fileName + "\": " + e1.Message);
+            //}
+            //catch (Exception e2)
+            //{
+            //    Debug.WriteLine("Exception: " + e2.Message);
+            //}
+
+            //*************************************************************************
+
+
             //System.IO.File.WriteAllText(fileName, strCalibration);
             /*if (!string.IsNullOrEmpty(strCalibration))
             {
