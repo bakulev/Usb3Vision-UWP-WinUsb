@@ -525,6 +525,16 @@ namespace ImageFileSourceDeviceUwp
             return image;
         }
 
+        public Task SetLaserState(ushort Laser, bool Enabled)
+        {
+            return null;
+        }
+
+        public Task<bool> GetEnabled(ushort Laser)
+        {
+            return new Task<bool>( () => false ); 
+        }
+
         #endregion
 
         #region Specific methods for UI

@@ -301,20 +301,17 @@ namespace UwpGetImage.ViewModels
         async Task<WriteableBitmap> GetImageFromCamera()
         {
             CurrentStatus = "Checking for laser.";
-            //int imageWidth = _camera.ImageWidth;
-            //int imageHeight = _camera.ImageHeight;
-
             //TODO: temporary code
-            bool isLaserAvailable = false;//await _lasers.GetEnabled(0);
-            if (isLaserAvailable && IsLaserChecked)
+            bool isLaserAvailable = await _lasers.GetEnabled(0);
+            if (isLaserAvailable)
             {
                 CurrentStatus = "Starting Laser";
-                await _lasers.SetLaserState(0, true);
+                await _lasers.SetLaserState(0, IsLaserChecked);
             }
 
             //Start taking image. [shutterState = open, exposureType = light]
             CurrentStatus = "Starting exposure.";
-            var image = await _camera.AcquireImageAsync(new AcquireParams { ExposureTime = ExposureTime * 1000, AnalogGain = 1, ExposureType = false },
+            var image = await _camera.AcquireImageAsync(new AcquireParams { ExposureTime = ExposureTime * 1000, AnalogGain = 10, MaxGain = 29, MinGain = 0, ExposureType = false },
                 new System.Threading.CancellationToken());
             if (image != null)
             {

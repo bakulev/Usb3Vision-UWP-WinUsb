@@ -533,5 +533,9 @@ namespace Centice.Spectrometry.Base
         public float ExposureTime { get; set; }
 
         public float AnalogGain { get; set; }
+
+        public float MinGain { get; set; }
+
+        public float MaxGain { get; set; }
     }
 }

@@ -34,7 +34,9 @@ namespace BaslerWinUsb
 
         public Task<bool> GetEnabled(ushort Laser)
         {
-            throw new NotImplementedException();
+            if (Laser != 0)
+                throw new Exception("Wrong laserNum");
+            return _device.GetEnabled(Laser);
         }
 
         public Task<float> GetLaserTemperature(ushort Laser)
@@ -44,7 +46,10 @@ namespace BaslerWinUsb
 
         public Task SetLaserState(ushort Laser, bool Enabled)
         {
-            throw new NotImplementedException();
+            if (Laser != 0)
+                throw new Exception("Wrong laserNum");
+
+            return _device.SetLaserState(Laser, Enabled);
         }
     }
 }

@@ -122,12 +122,32 @@ namespace BaslerDeviceUwp
             throw new NotImplementedException();
         }
 
+
+
+        private async Task CorrectGainAsync(AcquireParams acquireParams)
+        {
+            //lower gain limit
+            var P1 = (int)acquireParams.MinGain;
+
+            //high gain limit         
+            var P2 = acquireParams.MaxGain;
+
+            var gain = (P1 == 226) ? (2048 - 2048 * Math.Exp(-acquireParams.AnalogGain * Math.Log(10) / 20)) : (acquireParams.AnalogGain * 10 + P2);
+
+            var rez = await _cameraHelper.SetConfigRegisterAsync(131108, (int)gain);
+            gain = await _cameraHelper.GetBlocksSizeAsync(131108);
+
+        }
+
         public async Task<ushort[,]> TakeImage(
             AcquireParams acquireParams, CancellationToken ct, IProgress<CameraProgressEventArgs> progress = null)
         {
 
             //Pixel format
             var rez = await _cameraHelper.SetConfigRegisterAsync(196644, 5);
+
+            //set gain
+            await CorrectGainAsync(acquireParams);
 
             //Get SBRM register
             var sbrm = await _cameraHelper.GetRegisterValueAsync(0x001D8);
@@ -179,6 +199,19 @@ namespace BaslerDeviceUwp
 
             ImageHeight = height; ImageWidth = width;
             return ArrayHelper.UnpackImage(data, width, height);
+        }
+
+        public async Task<bool> GetEnabled(ushort Laser)
+        {
+            return await _cameraHelper.GetBlocksSizeAsync(0xc0248) == 1;
+        }
+
+        public async Task SetLaserState(ushort Laser, bool Enabled)
+        {
+            var rez = await _cameraHelper.SetConfigRegisterAsync(0xc0264, 0x1c);
+            rez &= await _cameraHelper.SetConfigRegisterAsync(0xc02e4, Enabled ? 1 : 0);
+            if (rez != 0)
+                throw new Exception("Can't set laser state");
         }
         #endregion
     }

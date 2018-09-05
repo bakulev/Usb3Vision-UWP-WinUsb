@@ -63,5 +63,10 @@ namespace Centice.Spectrometry.Base
 
         Task<ushort[,]> TakeImage(AcquireParams acquireParams, 
             CancellationToken ct, IProgress<CameraProgressEventArgs> progress = null);
+
+        Task SetLaserState(ushort Laser, bool Enabled);
+
+        Task<bool> GetEnabled(ushort Laser);
+
     }
 }
