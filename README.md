@@ -14,8 +14,8 @@ USB3Vision is a protocol for USB cameras that resides on top of USB protocol.
 According to [USB3Vision spec](https://github.com/zhoutotong/translateUSB3Vision_V1.0/blob/master/USB3_Vision_v1.0_Jan%2018-2013.pdf)
 , every USB3Vision device supports 3 logical interfaces: 
 - Control (Interface ID = 0) - to control device
-- Event (Interface ID = 1) - to get device specific events
-- Stream (Interface ID = 2) - to get data
+- Stream (Interface ID = 1) - to get data
+- Event (Interface ID = 2) - to get device specific events
 
 Data stream is separated into a frames. Each frame starts with leader block (the size of block is set by the device), then goes actual image data block (which can be split to several actual transfers).
 The frame ends with trailer block the size of block is set by the device).
