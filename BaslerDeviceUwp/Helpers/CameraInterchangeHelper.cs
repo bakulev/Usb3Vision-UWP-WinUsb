@@ -1,4 +1,4 @@
-﻿using BaslerDeviceUwp.USB3VisionTypes;
+﻿using CodaDevices.Devices.BaslerWinUsb.USB3VisionTypes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,9 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.Usb;
 using Windows.Storage.Streams;
-using static BaslerDeviceUwp.Constants.USB3Constants;
+using static CodaDevices.Devices.BaslerWinUsb.Constants.USB3Constants;
 
-namespace BaslerDeviceUwp.Helpers
+namespace CodaDevices.Devices.BaslerWinUsb.Helpers
 {
     public class CameraInterchangeHelper
     {

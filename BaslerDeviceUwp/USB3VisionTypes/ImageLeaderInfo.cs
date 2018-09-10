@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BaslerDeviceUwp.USB3VisionTypes
+namespace CodaDevices.Devices.BaslerWinUsb.USB3VisionTypes
 {
     public struct ImageLeaderInfo
     {

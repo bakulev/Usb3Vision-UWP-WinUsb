@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BaslerDeviceUwp.Constants
+namespace CodaDevices.Devices.BaslerWinUsb.Constants
 {
     public class USB3Constants
     {
