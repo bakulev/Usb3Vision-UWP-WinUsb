@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BaslerDeviceUwp.USB3VisionTypes
+namespace CodaDevices.Devices.BaslerWinUsb.USB3VisionTypes
 {
     public struct WriteMemCmdPayload
     {

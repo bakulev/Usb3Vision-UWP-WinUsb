@@ -23,7 +23,7 @@ using UwpGetImage.Models;
 using System.Diagnostics;
 using Centice.Spectrometry.Base;
 using Centice.Spectrometry.Spectrometers.Cameras;
-using BaslerDeviceUwp;
+using CodaDevices.Devices.ImageFile;
 using CodaDevices.Devices.BaslerWinUsb;
 
 namespace UwpGetImage.ViewModels
@@ -331,7 +331,7 @@ namespace UwpGetImage.ViewModels
                 {
                     CurrentStatus = "Stoping Laser.";
                     //TODO: temporary commented
-                    //await _lasers.SetLaserState(0, false);
+                    await _lasers.SetLaserState(0, false);
                 }
 
                 //Now convert the image and return.

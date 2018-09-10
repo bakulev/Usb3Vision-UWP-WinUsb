@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BaslerDeviceUwp.Helpers
+namespace CodaDevices.Devices.BaslerWinUsb.Helpers
 {
     public class ArrayHelper
     {

@@ -119,7 +119,13 @@ namespace CodaDevices.Devices.ImageFile
             if (acquireParams.ExposureType)
                 await _device.LaserTurnOn(ct);
 
-            var image = await _device.TakeImage(acquireParams, ct);
+            var takeParams = new TakeParams(
+                acquireParams.ExposureType,
+                acquireParams.ExposureTime,
+                acquireParams.AnalogGain,
+                acquireParams.MinGain,
+                acquireParams.MaxGain);
+            var image = await _device.TakeImage(takeParams, ct);
 
             if (acquireParams.ExposureType)
                 await _device.LaserTurnOff(ct);

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Centice.Spectrometry.Spectrometers.Cameras
+namespace CodaDevices.Devices.ImageFile
 {
     public class ImageFileLasers : IExcitationLasers
     {

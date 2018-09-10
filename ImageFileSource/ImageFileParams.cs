@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 //using Centice.Util;
 using System.Windows;
 using System.Threading;
-using CodaDevices.Devices.BaslerWinUsb;
+using Centice.Spectrometry.Spectrometers.Cameras;
 
-namespace Centice.Spectrometry.Spectrometers.Cameras
+namespace CodaDevices.Devices.ImageFile
 {
 
     public class ImageFileParams : IParamStorage

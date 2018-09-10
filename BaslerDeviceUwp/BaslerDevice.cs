@@ -1,5 +1,5 @@
-﻿using BaslerDeviceUwp.Helpers;
-using BaslerDeviceUwp.USB3VisionTypes;
+﻿using CodaDevices.Devices.BaslerWinUsb.Helpers;
+using CodaDevices.Devices.BaslerWinUsb.USB3VisionTypes;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
