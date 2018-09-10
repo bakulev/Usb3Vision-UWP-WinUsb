@@ -107,14 +107,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="BaslerDevice.cs" />
-    <Compile Include="Constants\USB3Constants.cs" />
-    <Compile Include="Helpers\ArrayHelper.cs" />
     <Compile Include="Helpers\CameraInterchangeHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="USB3VisionTypes\CommandHeader.cs" />
-    <Compile Include="USB3VisionTypes\ImageLeaderInfo.cs" />
-    <Compile Include="USB3VisionTypes\ReadMemCmdPayload.cs" />
-    <Compile Include="USB3VisionTypes\WriteMemCmdPayload.cs" />
     <EmbeddedResource Include="Properties\BaslerDeviceUwp.rd.xml" />
   </ItemGroup>
   <ItemGroup>
