@@ -21,7 +21,7 @@ namespace CodaDevices.Devices.ImageFile
 
         IUserInterface _ui;
 
-        IImageFileDevice _device;
+        IDevice _device;
 
         List<Task> _pendingTasks = new List<Task>();
 
@@ -80,7 +80,7 @@ namespace CodaDevices.Devices.ImageFile
         #region Public Constructor
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Await.Warning", "CS4014:Await.Warning")]
-        public ImageFileSource(IImageFileDevice device)
+        public ImageFileSource(IDevice device)
         {
             _device = device;
             _device.Attached += OnDeviceAttached;

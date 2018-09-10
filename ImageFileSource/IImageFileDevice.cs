@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Centice.Spectrometry.Base;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -17,6 +18,27 @@ namespace CodaDevices.Devices.ImageFile
         public float MinGain { get; set; }
 
         public float MaxGain { get; set; }
+
+        public TakeParams(
+            bool exposureType,
+            float exposureTime,
+            float analogGain,
+            float minGain,
+            float maxGain
+            )
+        {
+            ExposureType = exposureType;
+            ExposureTime = exposureTime;
+            AnalogGain = analogGain;
+            MinGain = minGain;
+            MaxGain = maxGain;
+        }
+
+        public static implicit operator TakeParams(AcquireParams p)
+        {
+            return new TakeParams(p.ExposureType, p.ExposureTime,
+                p.AnalogGain, p.MinGain, p.MaxGain);
+        }
     }
 
     /// <summary>

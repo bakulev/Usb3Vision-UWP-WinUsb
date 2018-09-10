@@ -23,9 +23,8 @@ using UwpGetImage.Models;
 using System.Diagnostics;
 using Centice.Spectrometry.Base;
 using Centice.Spectrometry.Spectrometers.Cameras;
-using ImageFileSourceDeviceUwp;
 using BaslerDeviceUwp;
-using BaslerWinUsb;
+using CodaDevices.Devices.BaslerWinUsb;
 
 namespace UwpGetImage.ViewModels
 {

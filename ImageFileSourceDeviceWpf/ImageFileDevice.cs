@@ -278,18 +278,18 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
             return ConvertDoubleToUshort(imageDouble);
             */
 
-            if (_isLaserTurnedOn)
-                image = PASS.CommonLibrary.Utility.Imaging.Png16LoadImagePacked(
-                    Path.Combine(measurementPath,
-                    _exposureTime.ToString("000.000",
-                        System.Globalization.CultureInfo.InvariantCulture).Replace(".", "") + "L",
-                    "00000.png"), ct);
-            else
-                image = PASS.CommonLibrary.Utility.Imaging.Png16LoadImagePacked(
-                    Path.Combine(measurementPath,
-                    _exposureTime.ToString("000.000",
-                        System.Globalization.CultureInfo.InvariantCulture).Replace(".", "") + "D",
-                    "00000.png"), ct);
+            //if (_isLaserTurnedOn)
+            //    image = PASS.CommonLibrary.Utility.Imaging.Png16LoadImagePacked(
+            //        Path.Combine(measurementPath,
+            //        _exposureTime.ToString("000.000",
+            //            System.Globalization.CultureInfo.InvariantCulture).Replace(".", "") + "L",
+            //        "00000.png"), ct);
+            //else
+            //    image = PASS.CommonLibrary.Utility.Imaging.Png16LoadImagePacked(
+            //        Path.Combine(measurementPath,
+            //        _exposureTime.ToString("000.000",
+            //            System.Globalization.CultureInfo.InvariantCulture).Replace(".", "") + "D",
+            //        "00000.png"), ct);
 
             return image;
         }
@@ -374,12 +374,12 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
             double shift = (maskBinary.GetLength(0) / 2d * maskExpantionRatio) - 1;
             double a2 = -curvature / (32d * 32d); // (32d - 43d) / (32d * 32d);
             double a1 = 1d - a2 * 64d;
-            for (int i = 0; i < spectrumSimulated.GetLength(0); i++)
-            {
-                if (spectrumSimulated[i] > 0)
-                    CodedApertureSimulation.SimulateLineCurvature(ref imageBinned, maskBinary, i - shift, spectrumSimulated[i], maskExpantionRatio, a2, a1);
-                //CodedApertureHelper.SimulateLine(ref _imageBinned, _maskBinary, i - shift, 1, maskExpantionRatio);
-            }
+            //for (int i = 0; i < spectrumSimulated.GetLength(0); i++)
+            //{
+            //    if (spectrumSimulated[i] > 0)
+            //        CodedApertureSimulation.SimulateLineCurvature(ref imageBinned, maskBinary, i - shift, spectrumSimulated[i], maskExpantionRatio, a2, a1);
+            //    //CodedApertureHelper.SimulateLine(ref _imageBinned, _maskBinary, i - shift, 1, maskExpantionRatio);
+            //}
 
             var image = new double[_imageHeight, _imageWidth];
             for (int w = 0; w < _imageWidth; w++)

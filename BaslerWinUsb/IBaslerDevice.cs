@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Centice.Spectrometry.Base;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -31,6 +32,12 @@ namespace CodaDevices.Devices.BaslerWinUsb
             AnalogGain = analogGain;
             MinGain = minGain;
             MaxGain = maxGain;
+        }
+
+        public static implicit operator TakeParams(AcquireParams p)
+        {
+            return new TakeParams(p.ExposureType, p.ExposureTime,
+                p.AnalogGain, p.MinGain, p.MaxGain);
         }
     }
 

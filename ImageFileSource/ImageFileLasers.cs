@@ -1,4 +1,5 @@
 ﻿using Centice.Spectrometry.Base;
+using CodaDevices.Devices.BaslerWinUsb;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
     {
         #region Variables
 
-        IImageDevice _device;
+        IDevice _device;
 
         bool _isEnabled = true;
 
@@ -116,7 +117,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
         #region Public ctor
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Await.Warning", "CS4014:Await.Warning")]
-        public ImageFileLasers(IImageDevice device)
+        public ImageFileLasers(IDevice device)
         {
             _device = device;
             _device.Attached += OnDeviceAttached;

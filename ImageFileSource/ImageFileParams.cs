@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 //using Centice.Util;
 using System.Windows;
 using System.Threading;
+using CodaDevices.Devices.BaslerWinUsb;
 
 namespace Centice.Spectrometry.Spectrometers.Cameras
 {
@@ -18,7 +19,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
     {
         #region Variables
 
-        IImageDevice _device;
+        IDevice _device;
 
         List<Task> _pendingTasks = new List<Task>();
 
@@ -104,7 +105,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
         #region Public Constructor
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Await.Warning", "CS4014:Await.Warning")]
-        public ImageFileParams (IImageDevice device, IUserInterface ui)
+        public ImageFileParams (IDevice device, IUserInterface ui)
         {
             _device = device;
             _device.Attached += OnDeviceAttached;

@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BaslerWinUsb\BaslerWinUsb.csproj" />
     <ProjectReference Include="..\CamerasCommon\CamerasCommon.csproj" />
   </ItemGroup>
 
