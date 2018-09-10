@@ -17,8 +17,11 @@ namespace CodaDevices.Devices.BaslerWinUsb.Helpers
         #region Constructors
         public CameraInterchangeHelper()
         {
+            //answer required, in another case should be 0
             _header.flags = 0x4000;
-            _header.prefix = 0x43563355;  // must be 0x43563355
+
+            // must be 0x43563355, magic number
+            _header.prefix = 0x43563355;  
             _header.length = (short)System.Runtime.InteropServices.Marshal.SizeOf(
                 typeof(ReadMemCmdPayload));
         }

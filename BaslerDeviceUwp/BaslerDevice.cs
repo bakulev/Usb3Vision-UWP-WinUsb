@@ -29,6 +29,7 @@ namespace CodaDevices.Devices.BaslerWinUsb
         private UsbDevice _targetDevice;
         CameraInterchangeHelper _cameraHelper;
 
+        //product info
         const UInt32 VendorId = 0x2676;
         const UInt32 ProductId = 0xBA02;
         #endregion
@@ -74,10 +75,6 @@ namespace CodaDevices.Devices.BaslerWinUsb
                     {
                         _cameraHelper.StreamInPipe = interf.BulkInPipes[0];
                     }
-                    //else if (interf.InterfaceNumber == 2)
-                    //{
-                    //    _cameraHelper.StreamInPipe = interf.BulkInPipes[0];
-                    //}
                 }
 
                 IsAttached = true;
@@ -117,8 +114,6 @@ namespace CodaDevices.Devices.BaslerWinUsb
             throw new NotImplementedException();
         }
 
-
-
         private async Task CorrectGainAsync(TakeParams acquireParams)
         {
             //lower gain limit
@@ -127,8 +122,10 @@ namespace CodaDevices.Devices.BaslerWinUsb
             //high gain limit         
             var P2 = acquireParams.MaxGain;
 
+            //from props.txt
             var gain = (P1 == 226) ? (2048 - 2048 * Math.Exp(-acquireParams.AnalogGain * Math.Log(10) / 20)) : (acquireParams.AnalogGain * 10 + P2);
 
+            //set gain, 131108 register from props.txt
             var rez = await _cameraHelper.SetConfigRegisterAsync(131108, (int)gain);
             gain = await _cameraHelper.GetBlocksSizeAsync(131108);
 
@@ -156,31 +153,49 @@ namespace CodaDevices.Devices.BaslerWinUsb
             //Get trailer size
             var trailerSize = await _cameraHelper.GetBlocksSizeAsync(sirm + 0x14);
 
+            //image width and height, registers from props.txt
             var width = await _cameraHelper.GetBlocksSizeAsync(197124);
             var height = await _cameraHelper.GetBlocksSizeAsync(197156);
 
-            ///
+            //trigger_mode_off (on = 1), registers from props.txt
             rez = await _cameraHelper.SetConfigRegisterAsync(0x40104, 0);
+
+            //unknown register from WireShark dump
             rez = await _cameraHelper.SetConfigRegisterAsync(0x40204, 0);
+
+            //acquisition mode, 0-single, 2-continue
             rez = await _cameraHelper.SetConfigRegisterAsync(0x40004, 0);
+
+            //disable exposure
             rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0004, 0);
+
+            //single payload size
             rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x001C, width * height);
+
+            //count of payload transmitions
             rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0020, 4); 
+
+            //max final payload transfer 1 size (value from WireShark dump)
             rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0024, 206848);
+            //max final payload transfer 1 size (value from WireShark dump)
             rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0028, 0);
+
+            //leader and trailer sizes
             rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0018, leaderSize);
             rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x002c, trailerSize);
-            rez = await _cameraHelper.SetConfigRegisterAsync(0x40024, 0x01);
 
-            //exposure mode
+            //exposure mode,registers from props.txt
             //EnumEntry_ExposureMode_Timed = 1
             //EnumEntry_ExposureMode_TriggerWidth = 2
             rez = await _cameraHelper.SetConfigRegisterAsync(263172, 1);
 
-            //Exposure time
+            //Exposure time, registers from props.txt
             rez = await _cameraHelper.SetConfigRegisterAsync(263268, (int)acquireParams.ExposureTime);
 
+            //enable exposure
             rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0004, 1);
+
+            //start exposure
             rez = await _cameraHelper.SetConfigRegisterAsync(0x40024, 0x01);
 
             byte[] data = new byte[0];
@@ -190,6 +205,7 @@ namespace CodaDevices.Devices.BaslerWinUsb
                 data = ArrayHelper.ConcatArrays(data, await _cameraHelper.GetImageData());
             var trailer = await _cameraHelper.GetImageData();
 
+            //stop exposure
             rez = await _cameraHelper.SetConfigRegisterAsync(0x40044, 0x01);
 
             ImageHeight = height; ImageWidth = width;
@@ -198,12 +214,16 @@ namespace CodaDevices.Devices.BaslerWinUsb
 
         public async Task<bool> GetEnabled(ushort Laser)
         {
+            //check laser, registers from WireShark dump
             return await _cameraHelper.GetBlocksSizeAsync(0xc0248) == 1;
         }
 
         public async Task SetLaserState(ushort Laser, bool Enabled)
         {
+            //set gpio config, registers from WireShark dump
             var rez = await _cameraHelper.SetConfigRegisterAsync(0xc0264, 0x1c);
+
+            //enable/disable laser, registers from WireShark dump
             rez &= await _cameraHelper.SetConfigRegisterAsync(0xc02e4, Enabled ? 1 : 0);
             if (rez != 0)
                 throw new Exception("Can't set laser state");
