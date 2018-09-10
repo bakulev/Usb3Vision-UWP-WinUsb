@@ -21,7 +21,7 @@ namespace CodaDevices.Devices.ImageFile
 
         IUserInterface _ui;
 
-        IImageFileDevice _device;
+        IDevice _device;
 
         List<Task> _pendingTasks = new List<Task>();
 
@@ -80,7 +80,7 @@ namespace CodaDevices.Devices.ImageFile
         #region Public Constructor
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Await.Warning", "CS4014:Await.Warning")]
-        public ImageFileSource(IImageFileDevice device)
+        public ImageFileSource(IDevice device)
         {
             _device = device;
             _device.Attached += OnDeviceAttached;
@@ -119,7 +119,13 @@ namespace CodaDevices.Devices.ImageFile
             if (acquireParams.ExposureType)
                 await _device.LaserTurnOn(ct);
 
-            var image = await _device.TakeImage(acquireParams, ct);
+            var takeParams = new TakeParams(
+                acquireParams.ExposureType,
+                acquireParams.ExposureTime,
+                acquireParams.AnalogGain,
+                acquireParams.MinGain,
+                acquireParams.MaxGain);
+            var image = await _device.TakeImage(takeParams, ct);
 
             if (acquireParams.ExposureType)
                 await _device.LaserTurnOff(ct);

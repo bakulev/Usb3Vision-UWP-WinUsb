@@ -17,6 +17,21 @@ namespace CodaDevices.Devices.ImageFile
         public float MinGain { get; set; }
 
         public float MaxGain { get; set; }
+
+        public TakeParams(
+            bool exposureType,
+            float exposureTime,
+            float analogGain,
+            float minGain,
+            float maxGain
+            )
+        {
+            ExposureType = exposureType;
+            ExposureTime = exposureTime;
+            AnalogGain = analogGain;
+            MinGain = minGain;
+            MaxGain = maxGain;
+        }
     }
 
     /// <summary>
