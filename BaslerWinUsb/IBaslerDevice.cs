@@ -4,9 +4,66 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Centice.Spectrometry.Base
+namespace CodaDevices.Devices.BaslerWinUsb
 {
-    public interface IImageDevice
+    public class TakeParams
+    {
+        public bool ExposureType { get; set; }
+
+        public float ExposureTime { get; set; }
+
+        public float AnalogGain { get; set; }
+
+        public float MinGain { get; set; }
+
+        public float MaxGain { get; set; }
+
+        public TakeParams(
+            bool exposureType,
+            float exposureTime,
+            float analogGain,
+            float minGain,
+            float maxGain
+            )
+        { 
+            ExposureType = exposureType;
+            ExposureTime = exposureTime;
+            AnalogGain = analogGain;
+            MinGain = minGain;
+            MaxGain = maxGain;
+        }
+    }
+
+    /// <summary>
+    /// Progress EventArgs for all camera awaitable methods.
+    /// </summary>
+    public class TakeProgressEventArgs : EventArgs
+    {
+        int _percentage = 0;
+
+        public int Percentage
+        {
+            get { return _percentage; }
+        }
+
+        string _description = "";
+
+        public string Description
+        {
+            get { return _description; }
+        }
+
+        public TakeProgressEventArgs(
+            int percentage, 
+            string description
+            )
+        {
+            _percentage = percentage;
+            _description = description;
+        }
+    }
+
+    public interface IDevice
     {
 
         #region Fields
@@ -61,8 +118,8 @@ namespace Centice.Spectrometry.Base
         Task<bool> SetExposure(float exposureTime,
             CancellationToken ct);
 
-        Task<ushort[,]> TakeImage(AcquireParams acquireParams, 
-            CancellationToken ct, IProgress<CameraProgressEventArgs> progress = null);
+        Task<ushort[,]> TakeImage(TakeParams acquireParams, 
+            CancellationToken ct, IProgress<TakeProgressEventArgs> progress = null);
 
         Task SetLaserState(ushort Laser, bool Enabled);
 

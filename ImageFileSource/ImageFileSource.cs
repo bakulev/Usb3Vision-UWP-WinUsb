@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Centice.Spectrometry.Base;
 
-namespace Centice.Spectrometry.Spectrometers.Cameras
+namespace CodaDevices.Devices.ImageFile
 {
 
     public class ImageFileSource : ICamera
@@ -21,7 +21,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
 
         IUserInterface _ui;
 
-        IImageDevice _device;
+        IImageFileDevice _device;
 
         List<Task> _pendingTasks = new List<Task>();
 
@@ -80,7 +80,7 @@ namespace Centice.Spectrometry.Spectrometers.Cameras
         #region Public Constructor
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Await.Warning", "CS4014:Await.Warning")]
-        public ImageFileSource(IImageDevice device)
+        public ImageFileSource(IImageFileDevice device)
         {
             _device = device;
             _device.Attached += OnDeviceAttached;

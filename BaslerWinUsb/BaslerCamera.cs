@@ -3,12 +3,12 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace BaslerWinUsb
+namespace CodaDevices.Devices.BaslerWinUsb
 {
     public class BaslerCamera : ICamera
     {
         #region Constructors
-        public BaslerCamera(IImageDevice device)
+        public BaslerCamera(IDevice device)
         {
             _device = device;
             _device.Attached += _device_Attached;
@@ -17,7 +17,7 @@ namespace BaslerWinUsb
         #endregion
 
         #region Fields
-        IImageDevice _device;
+        IDevice _device;
         #endregion
 
         #region Properties
@@ -40,11 +40,27 @@ namespace BaslerWinUsb
         #endregion
 
         #region Methods
-        public async Task<CameraImage> AcquireImageAsync(AcquireParams acquireParams, CancellationToken ct, IProgress<CameraProgressEventArgs> progress = null)
+        public async Task<CameraImage> AcquireImageAsync(AcquireParams acquireParams, 
+            CancellationToken ct, IProgress<CameraProgressEventArgs> progress = null)
         {
+            var takeParams = new TakeParams(
+                acquireParams.ExposureType,
+                acquireParams.ExposureTime,
+                acquireParams.AnalogGain,
+                acquireParams.MinGain,
+                acquireParams.MaxGain
+            );
+            var takeProgress = new Progress<TakeProgressEventArgs>();
+            takeProgress.ProgressChanged += (s, e) =>
+            {
+                progress.Report(
+                    new CameraProgressEventArgs(e.Percentage, e.Description)
+                    );
+            };
+
             return new CameraImage()
             {
-                Image = await _device.TakeImage(acquireParams, ct, progress),
+                Image = await _device.TakeImage(takeParams, ct, takeProgress),
                 ImageWidth = ImageWidth, ImageHeight = ImageHeight
             };
         }

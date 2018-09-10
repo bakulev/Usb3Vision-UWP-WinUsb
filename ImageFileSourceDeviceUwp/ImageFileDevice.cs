@@ -1,15 +1,12 @@
-﻿using Centice.Spectrometry.Base;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ImageFileSourceDeviceUwp
+namespace CodaDevices.Devices.ImageFile
 {
-    public class ImageFileDevice : IImageDevice
+    public class ImageFileDevice : IDevice
     {
         #region Variables
 
@@ -250,7 +247,7 @@ namespace ImageFileSourceDeviceUwp
         }
 
         public async Task<ushort[,]> TakeImage(
-            AcquireParams acquireParams, CancellationToken ct, IProgress<CameraProgressEventArgs> progress = null)
+            TakeParams acquireParams, CancellationToken ct, IProgress<TakeProgressEventArgs> progress = null)
         {
             await Task.Delay(0); // temporary for eliminating warning message.
 

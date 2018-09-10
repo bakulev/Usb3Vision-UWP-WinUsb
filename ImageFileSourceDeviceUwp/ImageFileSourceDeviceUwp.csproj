@@ -116,9 +116,9 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CamerasCommon\CamerasCommon.csproj">
-      <Project>{DC4EE928-51CC-4EB9-B6B4-5FF3E200EF6E}</Project>
-      <Name>CamerasCommon</Name>
+    <ProjectReference Include="..\ImageFileSource\ImageFileSource.csproj">
+      <Project>{6d876fd3-080d-42a9-acb1-e84a46c15858}</Project>
+      <Name>ImageFileSource</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

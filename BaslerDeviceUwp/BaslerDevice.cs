@@ -1,19 +1,14 @@
 ﻿using BaslerDeviceUwp.Helpers;
 using BaslerDeviceUwp.USB3VisionTypes;
-using Centice.Spectrometry.Base;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Usb;
 
-namespace BaslerDeviceUwp
+namespace CodaDevices.Devices.BaslerWinUsb
 {
-    public class BaslerDevice : IImageDevice
+    public class BaslerDevice : IDevice
     {
         #region Constructors
         public BaslerDevice()
@@ -124,7 +119,7 @@ namespace BaslerDeviceUwp
 
 
 
-        private async Task CorrectGainAsync(AcquireParams acquireParams)
+        private async Task CorrectGainAsync(TakeParams acquireParams)
         {
             //lower gain limit
             var P1 = (int)acquireParams.MinGain;
@@ -140,7 +135,7 @@ namespace BaslerDeviceUwp
         }
 
         public async Task<ushort[,]> TakeImage(
-            AcquireParams acquireParams, CancellationToken ct, IProgress<CameraProgressEventArgs> progress = null)
+            TakeParams acquireParams, CancellationToken ct, IProgress<TakeProgressEventArgs> progress = null)
         {
 
             //Pixel format

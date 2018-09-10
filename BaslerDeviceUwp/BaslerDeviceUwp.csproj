@@ -123,9 +123,9 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CamerasCommon\CamerasCommon.csproj">
-      <Project>{DC4EE928-51CC-4EB9-B6B4-5FF3E200EF6E}</Project>
-      <Name>CamerasCommon</Name>
+    <ProjectReference Include="..\BaslerWinUsb\BaslerWinUsb.csproj">
+      <Project>{3fc5cb9c-ad14-44f5-9a9c-b96cf9e507d7}</Project>
+      <Name>BaslerWinUsb</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

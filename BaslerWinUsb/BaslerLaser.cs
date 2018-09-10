@@ -4,19 +4,19 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BaslerWinUsb
+namespace CodaDevices.Devices.BaslerWinUsb
 {
     public class BaslerLaser : IExcitationLasers
     {
         #region Constructors
-        public BaslerLaser(IImageDevice device)
+        public BaslerLaser(IDevice device)
         {
             _device = device;
         }
         #endregion
 
         #region Fields
-        IImageDevice _device;
+        IDevice _device;
         #endregion
 
         public string Name => throw new NotImplementedException();

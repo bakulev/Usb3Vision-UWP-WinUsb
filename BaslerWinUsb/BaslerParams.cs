@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace BaslerWinUsb
+namespace CodaDevices.Devices.BaslerWinUsb
 {
     public class BaslerParams : IParamStorage
     {
