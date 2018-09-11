@@ -135,98 +135,129 @@ namespace CodaDevices.Devices.BaslerWinUsb
             TakeParams acquireParams, CancellationToken ct, IProgress<TakeProgressEventArgs> progress = null)
         {
 
-            //Pixel format
-            var rez = await _cameraHelper.SetConfigRegisterAsync(196644, 5);
+            if (!IsAttached)
+                throw new Exception("Camera should be attached to PC");
 
-            //set gain
-            await CorrectGainAsync(acquireParams);
+            try
+            {
+                //Pixel format
+                var rez = await _cameraHelper.SetConfigRegisterAsync(196644, 5);
 
-            //Get SBRM register
-            var sbrm = await _cameraHelper.GetRegisterValueAsync(0x001D8);
+                //set gain
+                await CorrectGainAsync(acquireParams);
 
-            //Read SIRM register
-            var sirm = await _cameraHelper.GetRegisterValueAsync(sbrm + 0x0020);
+                //Get SBRM register
+                var sbrm = await _cameraHelper.GetRegisterValueAsync(0x001D8);
 
-            //Get leader size.
-            var leaderSize = await _cameraHelper.GetBlocksSizeAsync(sirm + 0x10);
+                //Read SIRM register
+                var sirm = await _cameraHelper.GetRegisterValueAsync(sbrm + 0x0020);
 
-            //Get trailer size
-            var trailerSize = await _cameraHelper.GetBlocksSizeAsync(sirm + 0x14);
+                //Get leader size.
+                var leaderSize = await _cameraHelper.GetBlocksSizeAsync(sirm + 0x10);
 
-            //image width and height, registers from props.txt
-            var width = await _cameraHelper.GetBlocksSizeAsync(197124);
-            var height = await _cameraHelper.GetBlocksSizeAsync(197156);
+                //Get trailer size
+                var trailerSize = await _cameraHelper.GetBlocksSizeAsync(sirm + 0x14);
 
-            //trigger_mode_off (on = 1), registers from props.txt
-            rez = await _cameraHelper.SetConfigRegisterAsync(0x40104, 0);
+                //image width and height, registers from props.txt
+                var width = await _cameraHelper.GetBlocksSizeAsync(197124);
+                var height = await _cameraHelper.GetBlocksSizeAsync(197156);
 
-            //unknown register from WireShark dump
-            rez = await _cameraHelper.SetConfigRegisterAsync(0x40204, 0);
+                //trigger_mode_off (on = 1), registers from props.txt
+                rez = await _cameraHelper.SetConfigRegisterAsync(0x40104, 0);
 
-            //acquisition mode, 0-single, 2-continue
-            rez = await _cameraHelper.SetConfigRegisterAsync(0x40004, 0);
+                //unknown register from WireShark dump
+                rez = await _cameraHelper.SetConfigRegisterAsync(0x40204, 0);
 
-            //disable exposure
-            rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0004, 0);
+                //acquisition mode, 0-single, 2-continue
+                rez = await _cameraHelper.SetConfigRegisterAsync(0x40004, 0);
 
-            //single payload size
-            rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x001C, width * height);
+                //disable exposure
+                rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0004, 0);
 
-            //count of payload transmitions
-            rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0020, 4); 
+                //single payload size
+                rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x001C, width * height);
 
-            //max final payload transfer 1 size (value from WireShark dump)
-            rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0024, 206848);
-            //max final payload transfer 1 size (value from WireShark dump)
-            rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0028, 0);
+                //count of payload transmitions
+                rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0020, 4);
 
-            //leader and trailer sizes
-            rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0018, leaderSize);
-            rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x002c, trailerSize);
+                //max final payload transfer 1 size (value from WireShark dump)
+                rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0024, 206848);
+                //max final payload transfer 1 size (value from WireShark dump)
+                rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0028, 0);
 
-            //exposure mode,registers from props.txt
-            //EnumEntry_ExposureMode_Timed = 1
-            //EnumEntry_ExposureMode_TriggerWidth = 2
-            rez = await _cameraHelper.SetConfigRegisterAsync(263172, 1);
+                //leader and trailer sizes
+                rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0018, leaderSize);
+                rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x002c, trailerSize);
 
-            //Exposure time, registers from props.txt
-            rez = await _cameraHelper.SetConfigRegisterAsync(263268, (int)acquireParams.ExposureTime);
+                //exposure mode,registers from props.txt
+                //EnumEntry_ExposureMode_Timed = 1
+                //EnumEntry_ExposureMode_TriggerWidth = 2
+                rez = await _cameraHelper.SetConfigRegisterAsync(263172, 1);
 
-            //enable exposure
-            rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0004, 1);
+                //Exposure time, registers from props.txt
+                rez = await _cameraHelper.SetConfigRegisterAsync(263268, (int)acquireParams.ExposureTime);
 
-            //start exposure
-            rez = await _cameraHelper.SetConfigRegisterAsync(0x40024, 0x01);
+                //enable exposure
+                rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0004, 1);
 
-            byte[] data = new byte[0];
-            var leader = await _cameraHelper.GetImageData();
+                //start exposure
+                rez = await _cameraHelper.SetConfigRegisterAsync(0x40024, 0x01);
 
-            while (data.Length < width * height * 2)
-                data = ArrayHelper.ConcatArrays(data, await _cameraHelper.GetImageData());
-            var trailer = await _cameraHelper.GetImageData();
+                byte[] data = new byte[0];
+                var leader = await _cameraHelper.GetImageData();
 
-            //stop exposure
-            rez = await _cameraHelper.SetConfigRegisterAsync(0x40044, 0x01);
+                while (data.Length < width * height * 2)
+                    data = ArrayHelper.ConcatArrays(data, await _cameraHelper.GetImageData());
+                var trailer = await _cameraHelper.GetImageData();
 
-            ImageHeight = height; ImageWidth = width;
-            return ArrayHelper.UnpackImage(data, width, height);
+                //stop exposure
+                rez = await _cameraHelper.SetConfigRegisterAsync(0x40044, 0x01);
+
+                ImageHeight = height; ImageWidth = width;
+                return ArrayHelper.UnpackImage(data, width, height);
+            }
+            catch (ArgumentException)
+            {
+                OnDisconnect();
+                return null;
+            }
         }
 
         public async Task<bool> GetEnabled(ushort Laser)
         {
-            //check laser, registers from WireShark dump
-            return await _cameraHelper.GetBlocksSizeAsync(0xc0248) == 1;
+            try
+            {
+                //check laser, registers from WireShark dump
+                return await _cameraHelper.GetBlocksSizeAsync(0xc0248) == 1;
+            }
+            catch (ArgumentException)
+            {
+                OnDisconnect();
+                return false;
+            }
         }
 
         public async Task SetLaserState(ushort Laser, bool Enabled)
         {
-            //set gpio config, registers from WireShark dump
-            var rez = await _cameraHelper.SetConfigRegisterAsync(0xc0264, 0x1c);
+            try
+            {
+                //set gpio config, registers from WireShark dump
+                var rez = await _cameraHelper.SetConfigRegisterAsync(0xc0264, 0x1c);
 
-            //enable/disable laser, registers from WireShark dump
-            rez &= await _cameraHelper.SetConfigRegisterAsync(0xc02e4, Enabled ? 1 : 0);
-            if (rez != 0)
-                throw new Exception("Can't set laser state");
+                //enable/disable laser, registers from WireShark dump
+                rez &= await _cameraHelper.SetConfigRegisterAsync(0xc02e4, Enabled ? 1 : 0);
+                if (rez != 0)
+                    throw new Exception("Can't set laser state");
+            }catch(ArgumentException)
+            {
+                OnDisconnect();
+            }
+        }
+
+        private void OnDisconnect()
+        {
+            IsAttached = false;
+            Detached?.Invoke(this, EventArgs.Empty);
         }
         #endregion
     }

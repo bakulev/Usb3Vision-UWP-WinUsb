@@ -299,45 +299,58 @@ namespace UwpGetImage.ViewModels
 
         async Task<WriteableBitmap> GetImageFromCamera()
         {
-            CurrentStatus = "Checking for laser.";
-            //TODO: temporary code
-            bool isLaserAvailable = await _lasers.GetEnabled(0);
-            if (isLaserAvailable)
+            try
             {
-                CurrentStatus = "Starting Laser";
-                await _lasers.SetLaserState(0, IsLaserChecked);
-            }
-
-            //Start taking image. [shutterState = open, exposureType = light]
-            CurrentStatus = "Starting exposure.";
-            var image = await _camera.AcquireImageAsync(new AcquireParams { ExposureTime = ExposureTime * 1000, AnalogGain = 10, MaxGain = 29, MinGain = 0, ExposureType = false },
-                new System.Threading.CancellationToken());
-            if (image != null)
-            {
-                var currentTime = DateTime.Now;
-
-                //Await the exposure time.
-                await Funcs.PutTaskDelay(1000); //Just let it wait a second before a 
-
-                //Make sure image is ready.
-                CurrentStatus = $"Checking for exposure, elapsed {DateTime.Now.Subtract(currentTime).Seconds} seconds.";
-
-                //Get the image.
-                CurrentStatus = "Exposure available, now getting image.";
-                ushort[,] img = image.Image;
-
-                //Now stop the laser
-                if (isLaserAvailable && IsLaserChecked)
+                CurrentStatus = "Checking for laser.";
+                //TODO: temporary code
+                bool isLaserAvailable = await _lasers.GetEnabled(0);
+                if (isLaserAvailable)
                 {
-                    CurrentStatus = "Stoping Laser.";
-                    //TODO: temporary commented
-                    await _lasers.SetLaserState(0, false);
+                    CurrentStatus = "Starting Laser";
+                    await _lasers.SetLaserState(0, IsLaserChecked);
                 }
 
-                //Now convert the image and return.
-                CurrentStatus = "Done";
-                _lastImageArray = img;
-                return Imaging.GetImageFromUShort(img, IsScaledChecked, false);
+                //Start taking image. [shutterState = open, exposureType = light]
+                CurrentStatus = "Starting exposure.";
+                var image = await _camera.AcquireImageAsync(new AcquireParams { ExposureTime = ExposureTime * 1000, AnalogGain = 10, MaxGain = 29, MinGain = 0, ExposureType = false },
+                    new System.Threading.CancellationToken());
+                if (image != null)
+                {
+                    var currentTime = DateTime.Now;
+
+                    //Await the exposure time.
+                    await Funcs.PutTaskDelay(1000); //Just let it wait a second before a 
+
+                    //Make sure image is ready.
+                    CurrentStatus = $"Checking for exposure, elapsed {DateTime.Now.Subtract(currentTime).Seconds} seconds.";
+
+                    //Get the image.
+                    CurrentStatus = "Exposure available, now getting image.";
+                    ushort[,] img = image.Image;
+
+
+                    //Now stop the laser
+                    if (isLaserAvailable && IsLaserChecked)
+                    {
+                        CurrentStatus = "Stoping Laser.";
+                        //TODO: temporary commented
+                        await _lasers.SetLaserState(0, false);
+                    }
+
+                    if (img == null)
+                    {
+                        CurrentStatus = "Can't obtain image from camera";
+                        return null;
+                    }
+
+                    //Now convert the image and return.
+                    CurrentStatus = "Done";
+                    _lastImageArray = img;
+                    return Imaging.GetImageFromUShort(img, IsScaledChecked, false);
+                }
+            }catch(Exception ex)
+            {
+                CurrentStatus = ex.Message;
             }
             return null;
         }
@@ -349,6 +362,7 @@ namespace UwpGetImage.ViewModels
             IsAppEnabled = true; GetImageButtonEnabled = true;
             ToastNotificationString notification = new ToastNotificationString("Connected!",
                 "The camera has been connected.", DateTimeOffset.Now.AddMinutes(1));
+            CurrentStatus = "The camera has been connected.";
             notification.Show();
 
             //************************************************************************************
@@ -386,6 +400,7 @@ namespace UwpGetImage.ViewModels
             IsAppEnabled = false;
             ToastNotificationString notification = new ToastNotificationString("Disconnected!",
                 "The camera has been disconnected.", DateTimeOffset.Now.AddMinutes(1));
+            CurrentStatus = "The camera has been disconnected.";
             notification.Show();
         }
         #endregion
