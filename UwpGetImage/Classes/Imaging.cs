@@ -106,8 +106,9 @@ namespace UwpGetImage.Classes
                 }
             }
 
-            WriteableBitmap bitmap =  BitmapFactory.New(imgWidth, imgHeight);
-            
+            WriteableBitmap bitmap = BitmapFactory.New(imgWidth, imgHeight);
+
+
             using (bitmap.GetBitmapContext())
             {
                 for (int i = 0; i < imgHeight; i++)

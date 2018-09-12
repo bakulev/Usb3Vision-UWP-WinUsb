@@ -8,26 +8,29 @@ using Windows.Devices.Usb;
 
 namespace CodaDevices.Devices.BaslerWinUsb
 {
+    
     public class BaslerDevice : IDevice
     {
         #region Constructors
         public BaslerDevice()
         {
             //Create watcher to watch for device connection.
-            string aqs = UsbDevice.GetDeviceSelector(VendorId, ProductId);
-            var superMuttWatcher = DeviceInformation.CreateWatcher(aqs);
-            superMuttWatcher.Added += this.OnDeviceAdded;
-            superMuttWatcher.Removed += this.OnDeviceRemoved;
 
+            //var superMuttWatcher = DeviceInformation.CreateWatcher(aqs);
+            //superMuttWatcher.Added += this.OnDeviceAdded;
+            //superMuttWatcher.Removed += this.OnDeviceRemoved;
+            new Task(async () => await CheckDeviceAsync()).Start();
             _cameraHelper = new CameraInterchangeHelper();
 
-            superMuttWatcher.Start();
+            //superMuttWatcher.Start();
         }
         #endregion
 
         #region Fields
         private UsbDevice _targetDevice;
         CameraInterchangeHelper _cameraHelper;
+        private bool _close;
+        private bool _isAttached;
 
         //product info
         const UInt32 VendorId = 0x2676;
@@ -45,7 +48,22 @@ namespace CodaDevices.Devices.BaslerWinUsb
 
         public int ImageWidth { get; private set; }
 
-        public bool IsAttached { get; private set; }
+        public bool IsAttached 
+        {
+            get { return _isAttached; }
+            private set
+            {
+                if (_isAttached == value)
+                    return;
+                _isAttached = value;
+                if (_isAttached)
+                {
+                    Attached?.Invoke(this, EventArgs.Empty);
+                }
+                else
+                    Detached?.Invoke(this, EventArgs.Empty);
+            }
+        }
 
         public bool IsLaserEnabled => throw new NotImplementedException();
         #endregion
@@ -59,34 +77,48 @@ namespace CodaDevices.Devices.BaslerWinUsb
 
         #region Methods
 
-        private async void OnDeviceAdded(DeviceWatcher watcher, DeviceInformation deviceInformation)
+        private async Task CheckDeviceAsync()
         {
-            if (deviceInformation.IsEnabled)
+            while (!_close)
             {
-                _targetDevice = await UsbDevice.FromIdAsync(deviceInformation.Id);
-                foreach (var interf in _targetDevice.Configuration.UsbInterfaces)
+                Thread.Sleep(1000);
+                var aqs = UsbDevice.GetDeviceSelector(VendorId, ProductId);
+                var myDevices = await DeviceInformation.FindAllAsync(aqs);
+                if (myDevices.Count == 0)
                 {
-                    if (interf.InterfaceNumber == 0)
-                    {
-                        _cameraHelper.ControlInPipe = interf.BulkInPipes[0];
-                        _cameraHelper.ControlOutPipe = interf.BulkOutPipes[0];
-                    }
-                    else if (interf.InterfaceNumber == 1)
-                    {
-                        _cameraHelper.StreamInPipe = interf.BulkInPipes[0];
-                    }
+                    IsAttached = false;
+                    continue;
                 }
+                else
+                {
+                    if (IsAttached)
+                        continue;
 
-                IsAttached = true;
-                Attached?.Invoke(this, EventArgs.Empty);
+                    IsAttached = true;
+
+                    _targetDevice = await UsbDevice.FromIdAsync(myDevices[0].Id);
+                    if (_targetDevice != null)
+                        GetInterfaces();
+                }
             }
         }
 
-        private void OnDeviceRemoved(DeviceWatcher watcher, DeviceInformationUpdate deviceInformation)
+
+        private void GetInterfaces()
         {
-            _targetDevice = null;
-            IsAttached = false;
-            Detached?.Invoke(this, EventArgs.Empty);
+            if (_targetDevice == null) return;
+            foreach (var interf in _targetDevice.Configuration.UsbInterfaces)
+            {
+                if (interf.InterfaceNumber == 0)
+                {
+                    _cameraHelper.ControlInPipe = interf.BulkInPipes[0];
+                    _cameraHelper.ControlOutPipe = interf.BulkOutPipes[0];
+                }
+                else if (interf.InterfaceNumber == 1)
+                {
+                    _cameraHelper.StreamInPipe = interf.BulkInPipes[0];
+                }
+            }
         }
 
         public Task<bool> GetInterlockState()
@@ -136,7 +168,7 @@ namespace CodaDevices.Devices.BaslerWinUsb
         {
 
             if (!IsAttached)
-                throw new Exception("Camera should be attached to PC");
+                throw new Exception("The camera has been disconnected");
 
             try
             {
@@ -257,7 +289,6 @@ namespace CodaDevices.Devices.BaslerWinUsb
         private void OnDisconnect()
         {
             IsAttached = false;
-            Detached?.Invoke(this, EventArgs.Empty);
         }
         #endregion
     }

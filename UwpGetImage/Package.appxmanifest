@@ -26,7 +26,7 @@
     <Capability Name="internetClient" />
     <DeviceCapability Name="usb">
       <Device Id="vidpid:2676 BA02">
-        <Function Type="classId:ef 05 00" />
+        <Function Type="classId:ef * *" />
         <Function Type="name:vendorSpecific" />
       </Device>
     </DeviceCapability>
