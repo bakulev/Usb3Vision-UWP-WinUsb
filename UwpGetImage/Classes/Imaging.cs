@@ -133,7 +133,16 @@ namespace UwpGetImage.Classes
                             if (scale)
                                 bitmap.SetPixel(j, i, (byte)val, (byte)val, (byte)val);
                             else
-                                bitmap.SetPixel(j, i, (byte)(byte.MaxValue * val / ushort.MaxValue), (byte)(byte.MaxValue * val / ushort.MaxValue), (byte)(byte.MaxValue * val / ushort.MaxValue));
+                            {
+                                val >>= 4;
+                                var new_val = byte.MaxValue * (float)val / 4096;
+                                byte grey = 0;
+                                if (new_val > 255)
+                                    grey = 255;
+                                else
+                                    grey = (byte)new_val;
+                                bitmap.SetPixel(j, i, grey, grey, grey);
+                            }
                                 //bakulev Color.FromArgb(val, val, val));
                         }
                     }

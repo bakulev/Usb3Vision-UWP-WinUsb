@@ -319,7 +319,7 @@ namespace UwpGetImage.ViewModels
                     var currentTime = DateTime.Now;
 
                     //Await the exposure time.
-                    await Funcs.PutTaskDelay(1000); //Just let it wait a second before a 
+                    //await Funcs.PutTaskDelay(1000); //Just let it wait a second before a 
 
                     //Make sure image is ready.
                     CurrentStatus = $"Checking for exposure, elapsed {DateTime.Now.Subtract(currentTime).Seconds} seconds.";
