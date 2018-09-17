@@ -49,7 +49,8 @@ namespace UwpGetImage.Classes
                 PngWriter wrt = new PngWriter(stream.AsStreamForWrite(), imgInfo);
                 PngMetadata da = wrt.GetMetadata();
                 foreach (var item in metadata)
-                    da.SetText(item.Key, item.Value);
+                    if (item.Value != null)
+                        da.SetText(item.Key, item.Value);
                 ImageLines imLines = new ImageLines(imgInfo, ImageLine.ESampleType.INT, false, 0, imgHeight, 1);
                 for (int i = 0; i < imLines.ImgInfo.Rows; i++)
                     for (int j = 0; j < imLines.ImgInfo.Cols; j++)
@@ -134,7 +135,7 @@ namespace UwpGetImage.Classes
                                 bitmap.SetPixel(j, i, (byte)val, (byte)val, (byte)val);
                             else
                             {
-                                val >>= 4;
+                                //val >>= 4;
                                 var new_val = byte.MaxValue * (float)val / 4096;
                                 byte grey = 0;
                                 if (new_val > 255)

@@ -173,7 +173,7 @@ namespace CodaDevices.Devices.BaslerWinUsb
             try
             {
                 //Pixel format
-                var rez = await _cameraHelper.SetConfigRegisterAsync(196644, 5);
+                var rez = await _cameraHelper.SetConfigRegisterAsync(0x30024, 5);
 
                 //set gain
                 await CorrectGainAsync(acquireParams);
@@ -191,8 +191,8 @@ namespace CodaDevices.Devices.BaslerWinUsb
                 var trailerSize = await _cameraHelper.GetBlocksSizeAsync(sirm + 0x14);
 
                 //image width and height, registers from props.txt
-                var width = await _cameraHelper.GetBlocksSizeAsync(197124);
-                var height = await _cameraHelper.GetBlocksSizeAsync(197156);
+                var width = await _cameraHelper.GetBlocksSizeAsync(0x30204);
+                var height = await _cameraHelper.GetBlocksSizeAsync(0x30224);
 
                 //trigger_mode_off (on = 1), registers from props.txt
                 rez = await _cameraHelper.SetConfigRegisterAsync(0x40104, 0);

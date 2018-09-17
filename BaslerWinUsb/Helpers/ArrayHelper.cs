@@ -29,7 +29,7 @@ namespace CodaDevices.Devices.BaslerWinUsb.Helpers
             for (var i = 0; i < iHeight; ++i)
                 for (var j = 0; j < iWidth; ++j)
                 {
-                    result[i, j] = BitConverter.ToUInt16(new byte[2] { data[offset + 1], data[offset] }, 0);
+                    result[i, j] = BitConverter.ToUInt16(new byte[2] { data[offset], data[offset+1] }, 0);
                     offset += 2;
                 }
             return result;
