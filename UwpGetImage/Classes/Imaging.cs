@@ -136,7 +136,7 @@ namespace UwpGetImage.Classes
                             else
                             {
                                 //val >>= 4;
-                                var new_val = byte.MaxValue * (float)val / 4096;
+                                var new_val = byte.MaxValue * (float)val / ushort.MaxValue;
                                 byte grey = 0;
                                 if (new_val > 255)
                                     grey = 255;

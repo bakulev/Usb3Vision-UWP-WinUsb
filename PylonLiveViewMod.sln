@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29215.179
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PylonLiveViewMod", "PylonLiveViewMod\PylonLiveViewMod.csproj", "{F3B8803F-5231-4D54-B588-10BB340890B6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F3B8803F-5231-4D54-B588-10BB340890B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3B8803F-5231-4D54-B588-10BB340890B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3B8803F-5231-4D54-B588-10BB340890B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3B8803F-5231-4D54-B588-10BB340890B6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E25D5111-201B-4C5E-A969-FD8587ABC61F}
+	EndGlobalSection
+	GlobalSection(DPCodeReviewSolutionGUID) = preSolution
+		DPCodeReviewSolutionGUID = {00000000-0000-0000-0000-000000000000}
+	EndGlobalSection
+EndGlobal

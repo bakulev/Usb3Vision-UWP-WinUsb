@@ -178,7 +178,9 @@ namespace CodaDevices.Devices.BaslerWinUsb
             var P2 = acquireParams.MaxGain;
 
             //from props.txt
-            var gain = (P1 == 226) ? (2048 - 2048 * Math.Exp(-acquireParams.AnalogGain * Math.Log(10) / 20)) : (acquireParams.AnalogGain * 10 + P2);
+            //var gain = (P1 == 226) ? (2048 - 2048 * Math.Exp(-acquireParams.AnalogGain * Math.Log(10) / 20)) : (acquireParams.AnalogGain * 10 + P2);
+
+            var gain = acquireParams.AnalogGain * 10;
 
             //set gain, 131108 register from props.txt
             var rez = await _cameraHelper.SetConfigRegisterAsync(131108, (int)gain);
@@ -313,10 +315,10 @@ namespace CodaDevices.Devices.BaslerWinUsb
                     else
                         imageU[i] = ushort.MaxValue;
                 // Prepare visual informaition.
-                FindMinMax(imageU);
-                InsertHistogram(imageU, width, height);
-                InsertSection(imageU, width, height, width * 3 / 8);
-
+                //FindMinMax(imageU);
+                //InsertHistogram(imageU, width, height);
+                //InsertSection(imageU, width, height, width * 3 / 8);
+                // Convert to two dimentional array.
                 var result = new ushort[height, width];
                 var offset = 0;
                 for (var i = 0; i < height; ++i)
