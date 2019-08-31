@@ -301,7 +301,30 @@ namespace CodaDevices.Devices.BaslerWinUsb
                 await SetLaserState(0, false);
 
                 ImageHeight = height; ImageWidth = width;
-                return ArrayHelper.UnpackImage(data, width, height);
+                //return ArrayHelper.UnpackImage(data, width, height);
+
+                var imageU = new ushort[data.Length / 2];
+                // Copy single image.
+                Buffer.BlockCopy(data, 0, imageU, 0, data.Length);
+                // Average and scale.
+                for (var i = 0; i < imageU.Length; ++i)
+                    if (imageU[i] * 16 <= ushort.MaxValue)
+                        imageU[i] = (ushort)(imageU[i] * 16);
+                    else
+                        imageU[i] = ushort.MaxValue;
+                // Prepare visual informaition.
+                FindMinMax(imageU);
+                InsertHistogram(imageU, width, height);
+                InsertSection(imageU, width, height, width * 3 / 8);
+
+                var result = new ushort[height, width];
+                var offset = 0;
+                for (var i = 0; i < height; ++i)
+                    for (var j = 0; j < width; ++j)
+                    {
+                        result[i, j] = imageU[offset++];
+                    }
+                return result;
             }
             catch (ArgumentException)
             {
@@ -407,6 +430,57 @@ namespace CodaDevices.Devices.BaslerWinUsb
             {
                 observer.OnDeviceAvailabilityChanged(IsAttached);
             }
+        }
+
+        private void FindMinMax(ushort[] img)
+        {
+            var min = ushort.MaxValue;
+            var max = ushort.MinValue;
+            for (int i = 0; i < img.Length - 1; i++)
+            {
+                if (min > img[i]) min = img[i];
+                if (max < img[i]) max = img[i];
+            }
+        }
+
+        private void InsertHistogram(ushort[] img, int width, int height)
+        {
+            var histLen = 65;
+            var hist = new ushort[histLen];
+            // count hist values
+            for (int i = 0; i < img.Length; i++)
+                    hist[img[i] * (histLen - 1) / ushort.MaxValue]++;
+            // fill hist
+            for (int i = 0; i < hist.Length; i++)
+                hist[i] = (ushort)(hist[i] * width / 10000);
+            for (int i = 0; i < hist.Length; i++)
+                for (uint x = 0; x < hist[i] && x < width; x++)
+                    img[width * i + x] = ushort.MaxValue;
+        }
+
+        private void InsertSection(ushort[] img, int width, int height, int x)
+        {
+            var sectLen = 100;
+            var sect = new ushort[sectLen];
+            // Make section by max values. Skip first setion because there is histogram there.
+            var start = 65 * sectLen / height;
+            for (int s = start; s < sect.Length; s++)
+                for (int i = height * s / sectLen;
+                    i < height * (s + 1) / sectLen; i++)
+                    if (sect[s] < img[(width * i) + x])
+                        sect[s] = img[(width * i) + x];
+            // Scale
+            for (int s = 0; s < sect.Length; s++)
+                sect[s] = (ushort)(sect[s] * width / ushort.MaxValue);
+            // Draw x line
+            for (int s = 0; s < sect.Length; s++)
+                img[width * (height - sect.Length + s) + x] =
+                    ushort.MaxValue;
+            // Draw section
+            for (int s = 0; s < sect.Length; s++)
+                for (uint w = 0; w < sect[s] && w < width; w++)
+                    img[width * (height - sect.Length + s) + w] =
+                        ushort.MaxValue;
         }
     }
 }
