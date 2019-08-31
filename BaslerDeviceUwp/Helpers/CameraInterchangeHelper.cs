@@ -62,6 +62,7 @@ namespace CodaDevices.Devices.BaslerWinUsb.Helpers
                 catch (Exception exception)
                 {
                     Debug.WriteLine(exception.Message.ToString());
+                    throw;
                 }
                 return bytesWritten;
             }
@@ -107,6 +108,7 @@ namespace CodaDevices.Devices.BaslerWinUsb.Helpers
                 catch (Exception exception)
                 {
                     Debug.WriteLine(exception.Message);
+                    throw;
                 }
 
                 //Get buffer

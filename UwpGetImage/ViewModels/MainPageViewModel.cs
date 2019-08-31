@@ -25,14 +25,15 @@ using Centice.Spectrometry.Base;
 using Centice.Spectrometry.Spectrometers.Cameras;
 using CodaDevices.Devices.ImageFile;
 using CodaDevices.Devices.BaslerWinUsb;
+using CodaDevices.Spectrometry.Model;
 
 namespace UwpGetImage.ViewModels
 {
     public class MainPageViewModel : ViewModelBase
     {
         //Private vars.
-        private readonly ICamera _camera;
-        private readonly IExcitationLasers _lasers;
+        private readonly IBaslerCameraDriver _camera;
+        //private readonly IExcitationLasers _lasers;
         private readonly IDialogService _dialogService;
         private ushort[,] _lastImageArray;
 
@@ -47,9 +48,9 @@ namespace UwpGetImage.ViewModels
             SaveImageCommand = new RelayCommand(SaveImageMethod);
 
             //Setup camera: 
-            var device = new BaslerDevice();
-            _camera = new BaslerCamera(device);
-            _lasers = new BaslerLaser(device);
+            _camera = new BaslerDevice();
+            //_camera = new BaslerCamera(device);
+            //_lasers = new BaslerLaser(device);
             _camera.Attached += OnCameraConnected;
             _camera.Detached += OnCameraDisconnected;
 
@@ -301,19 +302,28 @@ namespace UwpGetImage.ViewModels
         {
             try
             {
-                CurrentStatus = "Checking for laser.";
+                /*CurrentStatus = "Checking for laser.";
                 //TODO: temporary code
-                bool isLaserAvailable = await _lasers.GetEnabled(0);
+                bool isLaserAvailable = await _camera.GetEnabled(0);
                 if (isLaserAvailable)
                 {
                     CurrentStatus = "Starting Laser";
-                    await _lasers.SetLaserState(0, IsLaserChecked);
-                }
+                    await _camera.SetLaserState(0, IsLaserChecked);
+                }*/
 
                 //Start taking image. [shutterState = open, exposureType = light]
                 CurrentStatus = "Starting exposure.";
-                var image = await _camera.AcquireImageAsync(new AcquireParams { ExposureTime = ExposureTime * 1000, AnalogGain = 10, MaxGain = 29, MinGain = 0, ExposureType = false },
-                    new System.Threading.CancellationToken());
+                //var image = await _camera.AcquireImageAsync(new AcquireParams { ExposureTime = ExposureTime * 1000, AnalogGain = 10, MaxGain = 29, MinGain = 0, ExposureType = false },
+                //    new System.Threading.CancellationToken());
+                var takeParams = new CodaDevices.Spectrometry.Model.TakeParams(
+                    IsLaserChecked,
+                    ExposureTime, // * 1000,
+                    24,
+                    0,
+                    24
+                );
+                var cts = new System.Threading.CancellationTokenSource();
+                var image = await _camera.TakeImage(takeParams, cts.Token);
                 if (image != null)
                 {
                     var currentTime = DateTime.Now;
@@ -326,16 +336,17 @@ namespace UwpGetImage.ViewModels
 
                     //Get the image.
                     CurrentStatus = "Exposure available, now getting image.";
-                    ushort[,] img = image.Image;
+                    ushort[,] img = image; //.Image;
 
 
-                    //Now stop the laser
+                    /*//Now stop the laser
                     if (isLaserAvailable && IsLaserChecked)
                     {
                         CurrentStatus = "Stoping Laser.";
                         //TODO: temporary commented
-                        await _lasers.SetLaserState(0, false);
+                        await _camera.SetLaserState(0, false);
                     }
+                    */
 
                     if (img == null)
                     {

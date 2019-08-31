@@ -1,15 +1,21 @@
 ﻿using CodaDevices.Devices.BaslerWinUsb.Helpers;
 using CodaDevices.Devices.BaslerWinUsb.USB3VisionTypes;
+using CodaDevices.Spectrometry.Model;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.ApplicationModel;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Usb;
+using Windows.Storage;
 
 namespace CodaDevices.Devices.BaslerWinUsb
 {
     
-    public class BaslerDevice : IDevice
+    public class BaslerDevice : IBaslerCameraDriver
     {
         #region Constructors
         public BaslerDevice()
@@ -81,7 +87,7 @@ namespace CodaDevices.Devices.BaslerWinUsb
         {
             while (!_close)
             {
-                Thread.Sleep(1000);
+                Thread.Sleep(10000);
                 var aqs = UsbDevice.GetDeviceSelector(VendorId, ProductId);
                 var myDevices = await DeviceInformation.FindAllAsync(aqs);
                 if (myDevices.Count == 0)
@@ -99,6 +105,8 @@ namespace CodaDevices.Devices.BaslerWinUsb
                     _targetDevice = await UsbDevice.FromIdAsync(myDevices[0].Id);
                     if (_targetDevice != null)
                         GetInterfaces();
+
+                    NotifyDeviceAvailabilityObservers();
                 }
             }
         }
@@ -118,6 +126,18 @@ namespace CodaDevices.Devices.BaslerWinUsb
                 {
                     _cameraHelper.StreamInPipe = interf.BulkInPipes[0];
                 }
+            }
+        }
+
+        public async Task Reset()
+        {
+            var aqs = UsbDevice.GetDeviceSelector(VendorId, ProductId);
+            var myDevices = await DeviceInformation.FindAllAsync(aqs);
+            if (myDevices.Count > 0)
+            {
+                _targetDevice = await UsbDevice.FromIdAsync(myDevices[0].Id);
+                if (_targetDevice != null)
+                    GetInterfaces();
             }
         }
 
@@ -141,9 +161,12 @@ namespace CodaDevices.Devices.BaslerWinUsb
             throw new NotImplementedException();
         }
 
-        public Task<bool> SetExposure(float exposureTime, CancellationToken ct)
+        public async Task<bool> SetExposure(float exposureTime, CancellationToken ct)
         {
-            throw new NotImplementedException();
+            int exposure = (int)(exposureTime * 1000000);
+            //Exposure time, registers from props.txt
+            var rez = await _cameraHelper.SetConfigRegisterAsync(263268, exposure);
+            return rez > 0;
         }
 
         private async Task CorrectGainAsync(TakeParams acquireParams)
@@ -172,8 +195,21 @@ namespace CodaDevices.Devices.BaslerWinUsb
 
             try
             {
-                //Pixel format
-                var rez = await _cameraHelper.SetConfigRegisterAsync(0x30024, 5);
+                bool success = false;
+                do
+                {
+                    try
+                    {
+                        //Pixel format
+                        var r1 = await _cameraHelper.SetConfigRegisterAsync(0x30024, 5);
+                        success = true;
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.WriteLine(e.Message);
+                        throw;
+                    }
+                } while (!success);
 
                 //set gain
                 await CorrectGainAsync(acquireParams);
@@ -195,7 +231,7 @@ namespace CodaDevices.Devices.BaslerWinUsb
                 var height = await _cameraHelper.GetBlocksSizeAsync(0x30224);
 
                 //trigger_mode_off (on = 1), registers from props.txt
-                rez = await _cameraHelper.SetConfigRegisterAsync(0x40104, 0);
+                var rez = await _cameraHelper.SetConfigRegisterAsync(0x40104, 0);
 
                 //unknown register from WireShark dump
                 rez = await _cameraHelper.SetConfigRegisterAsync(0x40204, 0);
@@ -227,7 +263,9 @@ namespace CodaDevices.Devices.BaslerWinUsb
                 rez = await _cameraHelper.SetConfigRegisterAsync(263172, 1);
 
                 //Exposure time, registers from props.txt
-                rez = await _cameraHelper.SetConfigRegisterAsync(263268, (int)acquireParams.ExposureTime);
+                rez = await _cameraHelper.SetConfigRegisterAsync(263268, (int)(acquireParams.ExposureTime * 1000000));
+
+                await SetLaserState(0, acquireParams.ExposureType);
 
                 //enable exposure
                 rez = await _cameraHelper.SetConfigRegisterAsync(sirm + 0x0004, 1);
@@ -239,11 +277,28 @@ namespace CodaDevices.Devices.BaslerWinUsb
                 var leader = await _cameraHelper.GetImageData();
 
                 while (data.Length < width * height * 2)
-                    data = ArrayHelper.ConcatArrays(data, await _cameraHelper.GetImageData());
+                {
+                    bool sucess = false;
+                    do
+                    {
+                        try
+                        {
+                            data = ArrayHelper.ConcatArrays(data, await _cameraHelper.GetImageData());
+                            success = true;
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.WriteLine(e.Message);
+                            throw;
+                        }
+                    } while (!success);
+                }
                 var trailer = await _cameraHelper.GetImageData();
 
                 //stop exposure
                 rez = await _cameraHelper.SetConfigRegisterAsync(0x40044, 0x01);
+
+                await SetLaserState(0, false);
 
                 ImageHeight = height; ImageWidth = width;
                 return ArrayHelper.UnpackImage(data, width, height);
@@ -289,7 +344,69 @@ namespace CodaDevices.Devices.BaslerWinUsb
         private void OnDisconnect()
         {
             IsAttached = false;
+            NotifyDeviceAvailabilityObservers();
         }
         #endregion
+
+        public async Task<string> GetCalibration()
+        {
+            string calibrationStr = "";
+
+            var fileName = "Calibration.xml";
+
+            var localFolder = ApplicationData.Current.LocalFolder;
+            var item = await localFolder.TryGetItemAsync(fileName);
+
+            if (item == null)
+            {
+                var installedLocation = Package.Current.InstalledLocation;
+                var hasSrc = await installedLocation.TryGetItemAsync($"Assets\\Data\\{fileName}");
+                if (hasSrc != null)
+                {
+                    var srcFile = await installedLocation.GetFileAsync($"Assets\\Data\\{fileName}");
+                    await srcFile.CopyAsync(ApplicationData.Current.LocalFolder);
+                }
+            }
+
+            var file = await localFolder.GetFileAsync(fileName);
+            using (var inputStream = await file.OpenReadAsync())
+            using (var classicStream = inputStream.AsStreamForRead())
+            using (var streamReader = new StreamReader(classicStream))
+            {
+                calibrationStr = await streamReader.ReadToEndAsync();
+            }
+
+            return calibrationStr;
+        }
+
+        private List<IDeviceAvailabilityObserver> deviceAvailabilityObserverList = new List<IDeviceAvailabilityObserver>();
+
+
+        public bool GetDeviceAvailability()
+        {
+            //Debug.WriteLine("GetDeviceAvailability");
+            return true; // for temporary use, for simulation without real device
+        }
+
+        public void RegisterDeviceAvailabilityObserver(IDeviceAvailabilityObserver observer)
+        {
+            //Debug.WriteLine("RegisterDeviceAvailabilityObserver");
+            deviceAvailabilityObserverList.Add(observer);
+        }
+
+        public void UnregisterDeviceAvailabilityObserver(IDeviceAvailabilityObserver observer)
+        {
+            //Debug.WriteLine("UnregisterDeviceAvailabilityObserver");
+            deviceAvailabilityObserverList.Remove(observer);
+        }
+
+        private void NotifyDeviceAvailabilityObservers()
+        {
+            //Debug.WriteLine("NotifyDeviceAvailabilityObservers");
+            foreach (IDeviceAvailabilityObserver observer in deviceAvailabilityObserverList)
+            {
+                observer.OnDeviceAvailabilityChanged(IsAttached);
+            }
+        }
     }
 }

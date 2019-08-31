@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2042
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29215.179
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UwpGetImage", "UwpGetImage\UwpGetImage.csproj", "{B1A304A7-0B0E-41DD-A588-968067C52520}"
 EndProject
@@ -24,6 +24,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaslerWinUsb", "BaslerWinUsb\BaslerWinUsb.csproj", "{3FC5CB9C-AD14-44F5-9A9C-B96CF9E507D7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BaslerDeviceUwp", "BaslerDeviceUwp\BaslerDeviceUwp.csproj", "{E001F83A-AE4F-4DDA-BD06-302DAF7DAE17}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MflModel", "MflModel\MflModel.csproj", "{E5A41DE6-85D5-425C-8964-20DFFC42B57D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -215,6 +217,22 @@ Global
 		{E001F83A-AE4F-4DDA-BD06-302DAF7DAE17}.Release|x64.Build.0 = Release|x64
 		{E001F83A-AE4F-4DDA-BD06-302DAF7DAE17}.Release|x86.ActiveCfg = Release|x86
 		{E001F83A-AE4F-4DDA-BD06-302DAF7DAE17}.Release|x86.Build.0 = Release|x86
+		{E5A41DE6-85D5-425C-8964-20DFFC42B57D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5A41DE6-85D5-425C-8964-20DFFC42B57D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5A41DE6-85D5-425C-8964-20DFFC42B57D}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{E5A41DE6-85D5-425C-8964-20DFFC42B57D}.Debug|ARM.Build.0 = Debug|Any CPU
+		{E5A41DE6-85D5-425C-8964-20DFFC42B57D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E5A41DE6-85D5-425C-8964-20DFFC42B57D}.Debug|x64.Build.0 = Debug|Any CPU
+		{E5A41DE6-85D5-425C-8964-20DFFC42B57D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E5A41DE6-85D5-425C-8964-20DFFC42B57D}.Debug|x86.Build.0 = Debug|Any CPU
+		{E5A41DE6-85D5-425C-8964-20DFFC42B57D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5A41DE6-85D5-425C-8964-20DFFC42B57D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5A41DE6-85D5-425C-8964-20DFFC42B57D}.Release|ARM.ActiveCfg = Release|Any CPU
+		{E5A41DE6-85D5-425C-8964-20DFFC42B57D}.Release|ARM.Build.0 = Release|Any CPU
+		{E5A41DE6-85D5-425C-8964-20DFFC42B57D}.Release|x64.ActiveCfg = Release|Any CPU
+		{E5A41DE6-85D5-425C-8964-20DFFC42B57D}.Release|x64.Build.0 = Release|Any CPU
+		{E5A41DE6-85D5-425C-8964-20DFFC42B57D}.Release|x86.ActiveCfg = Release|Any CPU
+		{E5A41DE6-85D5-425C-8964-20DFFC42B57D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
